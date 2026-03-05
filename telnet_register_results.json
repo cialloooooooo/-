@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "name": "示例寄存器组",
+    "timestamp": 1772729865.963309,
+    "timestamp_iso": "2026-03-06T00:57:45.963309",
+    "register_count": 5
+  },
+  "results": {
+    "CTRL": {
+      "name": "CTRL",
+      "address": 4096,
+      "description": "控制寄存器",
+      "value": 15,
+      "parsed_result": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "enable_desc": "使能位",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "mode_desc": "模式选择",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "clock_div_desc": "时钟分频",
+        "reset": 0,
+        "reset_bits": "8:8",
+        "reset_desc": "复位位"
+      },
+      "parser": "parser",
+      "last_read_time": 1772729865.963241,
+      "error": null,
+      "hex_address": "0x00001000",
+      "hex_value": "0x0000000f",
+      "last_read_time_iso": "2026-03-06T00:57:45.963241"
+    },
+    "STATUS": {
+      "name": "STATUS",
+      "address": 4100,
+      "description": "状态寄存器",
+      "value": 5,
+      "parsed_result": {
+        "raw_value": 5,
+        "raw_hex": "0x00000005",
+        "ready": 1,
+        "busy": 0,
+        "error": 1,
+        "overflow": 0,
+        "fifo_empty": 0,
+        "fifo_full": 0,
+        "status_description": "就绪 | 错误"
+      },
+      "parser": "status_register_parser",
+      "last_read_time": 1772729865.9632459,
+      "error": null,
+      "hex_address": "0x00001004",
+      "hex_value": "0x00000005",
+      "last_read_time_iso": "2026-03-06T00:57:45.963246"
+    },
+    "DATA": {
+      "name": "DATA",
+      "address": 4104,
+      "description": "数据寄存器",
+      "value": 305419896,
+      "parsed_result": {
+        "raw_value": 305419896,
+        "raw_hex": "0x12345678",
+        "decimal": 305419896,
+        "upper_16bits": 4660,
+        "lower_16bits": 22136
+      },
+      "parser": "data_register_parser",
+      "last_read_time": 1772729865.963248,
+      "error": null,
+      "hex_address": "0x00001008",
+      "hex_value": "0x12345678",
+      "last_read_time_iso": "2026-03-06T00:57:45.963248"
+    },
+    "CONFIG": {
+      "name": "CONFIG",
+      "address": 4108,
+      "description": "配置寄存器",
+      "value": 1,
+      "parsed_result": {
+        "raw_value": 1,
+        "raw_hex": "0x00000001"
+      },
+      "parser": null,
+      "last_read_time": 1772729865.9632497,
+      "error": null,
+      "hex_address": "0x0000100c",
+      "hex_value": "0x00000001",
+      "last_read_time_iso": "2026-03-06T00:57:45.963250"
+    },
+    "VERSION": {
+      "name": "VERSION",
+      "address": 4112,
+      "description": "版本寄存器",
+      "value": 0,
+      "parsed_result": {
+        "major": 0,
+        "minor": 0,
+        "patch": 0,
+        "build": 0
+      },
+      "parser": "<lambda>",
+      "last_read_time": 1772729865.963251,
+      "error": null,
+      "hex_address": "0x00001010",
+      "hex_value": "0x00000000",
+      "last_read_time_iso": "2026-03-06T00:57:45.963251"
+    }
+  }
+}
