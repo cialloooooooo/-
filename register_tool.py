@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 """
 寄存器读写工具 - 支持向Linux服务器发送寄存器并获取32位返回值
 提供可扩展的解析框架和数据存储功能
@@ -35,6 +36,8 @@
 2. 实现自定义解析器：继承RegisterParser类，实现parse方法
 3. 使用不同存储后端：JSONStorage、CSVStorage、SQLiteStorage
 4. 批量操作：使用read_multiple和write_multiple方法
+5. 寄存器定义管理：使用RegisterDefinition类定义寄存器元数据，使用register_definition()批量注册
+6. JSON配置文件：使用export_definitions()导出定义，使用load_definitions_from_json()加载定义
 
 注意：实际使用时需要根据服务器协议实现具体的RegisterAccess子类。
 """
@@ -91,6 +94,19 @@ class RegisterTransaction:
             if self.raw_value is not None:
                 return f"0x{self.raw_value:08x}"
         return None
+
+
+@dataclass
+class RegisterDefinition:
+    """寄存器定义元数据"""
+    address: int                    # 寄存器地址
+    name: str                      # 寄存器名称
+    description: str = ""          # 功能描述
+    parser: Optional[RegisterParser] = None  # 专属解析器，None表示使用默认解析器
+
+    def get_hex_address(self) -> str:
+        """获取十六进制格式的地址"""
+        return f"0x{self.address:08x}"
 
 
 class RegisterAccess(ABC):
@@ -248,6 +264,10 @@ class RegisterBank:
         self.parsers: Dict[int, RegisterParser] = {}  # 地址到解析器的映射
         self.default_parser: Optional[RegisterParser] = None
 
+        # 新增：寄存器定义管理
+        self._register_definitions: Dict[int, RegisterDefinition] = {}  # 地址到定义的映射
+        self.register_by_name: Dict[str, RegisterDefinition] = {}      # 名称到定义的映射
+
     def set_parser(self, address: int, parser: RegisterParser):
         """
         为特定寄存器地址设置解析器
@@ -264,7 +284,17 @@ class RegisterBank:
 
     def get_parser(self, address: int) -> Optional[RegisterParser]:
         """获取寄存器对应的解析器"""
-        return self.parsers.get(address, self.default_parser)
+        # 首先检查专属解析器
+        if address in self.parsers:
+            return self.parsers[address]
+
+        # 其次检查寄存器定义中的解析器
+        definition = self._register_definitions.get(address)
+        if definition is not None and definition.parser is not None:
+            return definition.parser
+
+        # 最后使用默认解析器
+        return self.default_parser
 
     def read(self, address: int, use_parser: bool = True) -> RegisterTransaction:
         """
@@ -422,6 +452,236 @@ class RegisterBank:
             'first_timestamp': min(t.timestamp for t in self.transactions),
             'last_timestamp': max(t.timestamp for t in self.transactions)
         }
+
+    def register_definition(self, definition: RegisterDefinition, overwrite: bool = False):
+        """注册单个寄存器定义
+
+        Args:
+            definition: 寄存器定义
+            overwrite: 是否允许覆盖已存在的定义（默认False）
+
+        Raises:
+            ValueError: 如果地址或名称已存在且不允许覆盖
+        """
+        # 验证地址唯一性
+        if definition.address in self._register_definitions and not overwrite:
+            existing = self._register_definitions[definition.address]
+            raise ValueError(
+                f"地址冲突: 地址 0x{definition.address:08x} 已被寄存器 '{existing.name}' 使用"
+            )
+
+        # 验证名称唯一性
+        if definition.name in self.register_by_name and not overwrite:
+            existing = self.register_by_name[definition.name]
+            raise ValueError(
+                f"名称冲突: 名称 '{definition.name}' 已被地址 0x{existing.address:08x} 使用"
+            )
+
+        self._register_definitions[definition.address] = definition
+        self.register_by_name[definition.name] = definition
+
+        # 如果定义了专属解析器，自动设置
+        if definition.parser is not None:
+            self.set_parser(definition.address, definition.parser)
+
+        return True
+
+    def register_definitions(self, definitions: List[RegisterDefinition], overwrite: bool = False):
+        """批量注册寄存器定义
+
+        Args:
+            definitions: 寄存器定义列表
+            overwrite: 是否允许覆盖已存在的定义（默认False）
+
+        Returns:
+            成功注册的数量
+        """
+        count = 0
+        for definition in definitions:
+            try:
+                self.register_definition(definition, overwrite)
+                count += 1
+            except ValueError as e:
+                # 可以选择记录警告或跳过
+                print(f"警告: 跳过寄存器定义 '{definition.name}': {e}")
+        return count
+
+    def get_definition_by_name(self, name: str) -> Optional[RegisterDefinition]:
+        """按名称获取寄存器定义"""
+        return self.register_by_name.get(name)
+
+    def get_definition_by_address(self, address: int) -> Optional[RegisterDefinition]:
+        """按地址获取寄存器定义"""
+        return self._register_definitions.get(address)
+
+    def read_by_name(self, name: str, use_parser: bool = True) -> RegisterTransaction:
+        """按名称读取寄存器"""
+        definition = self.get_definition_by_name(name)
+        if definition is None:
+            raise ValueError(f"未找到寄存器定义: '{name}'")
+        return self.read(definition.address, use_parser)
+
+    def write_by_name(self, name: str, value: int) -> RegisterTransaction:
+        """按名称写入寄存器"""
+        definition = self.get_definition_by_name(name)
+        if definition is None:
+            raise ValueError(f"未找到寄存器定义: '{name}'")
+        return self.write(definition.address, value)
+
+    def export_definitions(self, filepath: str = None) -> Dict[str, Any]:
+        """导出寄存器定义为字典或JSON文件
+
+        Args:
+            filepath: 可选，JSON文件路径。如果提供，将保存到文件
+
+        Returns:
+            寄存器定义字典
+        """
+        from datetime import datetime
+        definitions_list = []
+        for addr, defn in sorted(self._register_definitions.items()):
+            def_dict = {
+                "address": addr,
+                "address_hex": f"0x{addr:08x}",
+                "name": defn.name,
+                "description": defn.description,
+                "has_parser": defn.parser is not None,
+                "parser_type": defn.parser.__class__.__name__ if defn.parser else None
+            }
+            definitions_list.append(def_dict)
+
+        result = {
+            "metadata": {
+                "bank_name": self.name,
+                "export_time": datetime.now().isoformat(),
+                "total_definitions": len(self._register_definitions)
+            },
+            "definitions": definitions_list
+        }
+
+        if filepath:
+            import json
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+            print(f"寄存器定义已导出到: {filepath}")
+
+        return result
+
+    def list_definitions(self) -> List[RegisterDefinition]:
+        """获取所有寄存器定义列表（按地址排序）"""
+        return [self._register_definitions[addr] for addr in sorted(self._register_definitions.keys())]
+
+    def get_summary(self) -> Dict[str, Any]:
+        """获取寄存器定义摘要统计"""
+        total = len(self._register_definitions)
+        with_parser = sum(1 for d in self._register_definitions.values() if d.parser is not None)
+
+        if self._register_definitions:
+            min_addr = min(self._register_definitions.keys())
+            max_addr = max(self._register_definitions.keys())
+        else:
+            min_addr = 0
+            max_addr = 0
+
+        return {
+            "total_registers": total,
+            "registers_with_parser": with_parser,
+            "registers_without_parser": total - with_parser,
+            "address_range": {
+                "min": min_addr,
+                "max": max_addr
+            }
+        }
+
+    def load_definitions(self, data: Dict[str, Any], overwrite: bool = False,
+                         parser_factory: Optional[Callable[[Dict[str, Any]], Optional[RegisterParser]]] = None) -> int:
+        """从字典数据加载寄存器定义
+
+        Args:
+            data: 包含寄存器定义的字典数据，格式与export_definitions()输出相同
+            overwrite: 是否允许覆盖已存在的定义（默认False）
+            parser_factory: 可选，解析器工厂函数，接收定义字典，返回解析器实例或None
+
+        Returns:
+            成功加载的寄存器定义数量
+        """
+        if not isinstance(data, dict) or 'definitions' not in data:
+            raise ValueError("无效的数据格式，应包含 'definitions' 字段")
+
+        definitions = data.get('definitions', [])
+        count = 0
+
+        for def_dict in definitions:
+            try:
+                address = def_dict.get('address')
+                name = def_dict.get('name')
+                description = def_dict.get('description', '')
+
+                if address is None or name is None:
+                    print(f"警告: 跳过无效定义，缺少必要字段: {def_dict}")
+                    continue
+
+                # 创建解析器（如果提供工厂函数）
+                parser = None
+                if parser_factory is not None:
+                    try:
+                        parser = parser_factory(def_dict)
+                    except Exception as e:
+                        print(f"警告: 解析器工厂函数失败，定义 '{name}': {e}")
+                        parser = None
+
+                # 创建寄存器定义
+                reg_def = RegisterDefinition(
+                    address=address,
+                    name=name,
+                    description=description,
+                    parser=parser
+                )
+
+                # 注册定义
+                self.register_definition(reg_def, overwrite)
+                count += 1
+
+            except ValueError as e:
+                print(f"警告: 跳过定义 '{def_dict.get('name', 'unknown')}': {e}")
+            except Exception as e:
+                print(f"警告: 处理定义时发生错误 '{def_dict.get('name', 'unknown')}': {e}")
+
+        # 更新寄存器组名称（如果数据中有metadata）
+        metadata = data.get('metadata', {})
+        if metadata and 'bank_name' in metadata:
+            self.name = metadata['bank_name']
+
+        return count
+
+    def load_definitions_from_json(self, filepath: str, overwrite: bool = False,
+                                   parser_factory: Optional[Callable[[Dict[str, Any]], Optional[RegisterParser]]] = None) -> int:
+        """从JSON文件加载寄存器定义
+
+        Args:
+            filepath: JSON文件路径
+            overwrite: 是否允许覆盖已存在的定义（默认False）
+            parser_factory: 可选，解析器工厂函数，接收定义字典，返回解析器实例或None
+
+        Returns:
+            成功加载的寄存器定义数量
+
+        Raises:
+            FileNotFoundError: 文件不存在
+            json.JSONDecodeError: JSON格式错误
+        """
+        import json
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"文件不存在: {filepath}")
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(f"JSON格式错误: {e}", e.doc, e.pos)
+
+        count = self.load_definitions(data, overwrite, parser_factory)
+        print(f"从文件 {filepath} 加载了 {count} 个寄存器定义")
+        return count
 
 
 class StorageBackend(ABC):
@@ -863,5 +1123,187 @@ if __name__ == "__main__":
     storage = JSONStorage("register_data.json")
     storage.save_transactions(bank.transactions)
     storage.close()
+
+    # 7. 使用新功能的示例
+    print("\n=== 使用寄存器定义功能 ===")
+
+    # 创建寄存器定义
+    reg_defs = [
+        RegisterDefinition(
+            address=0x1000,
+            name="control_register",
+            description="控制寄存器",
+            parser=control_reg_parser
+        ),
+        RegisterDefinition(
+            address=0x2000,
+            name="status_register",
+            description="状态寄存器",
+            parser=None  # 使用默认解析器
+        ),
+        RegisterDefinition(
+            address=0x3000,
+            name="config_register",
+            description="配置寄存器",
+            parser=BitFieldParser({
+                'mode': {'bits': (0, 2), 'description': '工作模式'},
+                'enable': {'bits': (3, 3), 'description': '使能标志'}
+            })
+        )
+    ]
+
+    # 批量注册
+    registered_count = bank.register_definitions(reg_defs)
+    print(f"成功注册 {registered_count} 个寄存器定义")
+
+    # 按名称访问
+    try:
+        transaction = bank.read_by_name("control_register")
+        print(f"按名称读取 control_register: {transaction.get_hex_value()}")
+    except ValueError as e:
+        print(f"错误: {e}")
+
+    # 导出定义
+    summary = bank.get_summary()
+    print(f"\n寄存器摘要: {summary}")
+
+    # 导出到JSON文件
+    export_data = bank.export_definitions("register_definitions.json")
+    print(f"导出 {export_data['metadata']['total_definitions']} 个寄存器定义")
+
+    # 列出所有定义
+    print("\n所有寄存器定义:")
+    for i, defn in enumerate(bank.list_definitions(), 1):
+        parser_info = "有专属解析器" if defn.parser else "使用默认解析器"
+        print(f"  {i:2d}. {defn.name:20} (0x{defn.address:08x}): {defn.description} - {parser_info}")
+
+    # 测试定义验证
+    print("\n=== 测试定义验证 ===")
+    try:
+        # 尝试注册重复地址
+        duplicate_def = RegisterDefinition(
+            address=0x1000,
+            name="duplicate_register",
+            description="重复地址的寄存器"
+        )
+        bank.register_definition(duplicate_def)
+        print("错误: 应该检测到地址冲突")
+    except ValueError as e:
+        print(f"正确检测到地址冲突: {e}")
+
+    try:
+        # 尝试注册重复名称
+        duplicate_name_def = RegisterDefinition(
+            address=0x4000,
+            name="control_register",  # 重复名称
+            description="重复名称的寄存器"
+        )
+        bank.register_definition(duplicate_name_def)
+        print("错误: 应该检测到名称冲突")
+    except ValueError as e:
+        print(f"正确检测到名称冲突: {e}")
+
+    # 8. 演示从JSON文件加载寄存器定义
+    print("\n=== 演示从JSON文件加载寄存器定义 ===")
+
+    # 创建一个新的寄存器组来演示加载
+    new_bank = RegisterBank(access, "从JSON加载的寄存器组")
+
+    # 定义简单的解析器工厂函数
+    def simple_parser_factory(def_dict: Dict[str, Any]) -> Optional[RegisterParser]:
+        """根据定义信息创建解析器（示例工厂函数）"""
+        parser_type = def_dict.get('parser_type')
+        name = def_dict.get('name', 'unknown')
+        _address = def_dict.get('address', 0)  # 可能用于更复杂的工厂函数
+
+        if parser_type == 'BitFieldParser':
+            # 根据寄存器名称和地址创建不同的解析器
+            if name == 'control_register':
+                return BitFieldParser({
+                    'enable': {'bits': (0, 0), 'description': '使能位'},
+                    'mode': {'bits': (1, 3), 'description': '模式选择'}
+                })
+            elif name == 'config_register':
+                return BitFieldParser({
+                    'mode': {'bits': (0, 2), 'description': '工作模式'},
+                    'enable': {'bits': (3, 3), 'description': '使能标志'}
+                })
+        # 对于没有解析器或未知类型的返回None
+        return None
+
+    try:
+        # 从之前导出的文件加载
+        loaded_count = new_bank.load_definitions_from_json(
+            "register_definitions.json",
+            overwrite=True,
+            parser_factory=simple_parser_factory
+        )
+        print(f"成功从JSON文件加载了 {loaded_count} 个寄存器定义")
+
+        # 显示加载的定义
+        print(f"\n加载后的寄存器组: {new_bank.name}")
+        print("所有寄存器定义:")
+        for i, defn in enumerate(new_bank.list_definitions(), 1):
+            parser_info = "有专属解析器" if defn.parser else "使用默认解析器"
+            print(f"  {i:2d}. {defn.name:20} (0x{defn.address:08x}): {defn.description} - {parser_info}")
+
+        # 测试按名称访问加载的定义
+        print("\n测试按名称访问:")
+        try:
+            # 读取一个寄存器
+            transaction = new_bank.read_by_name("control_register")
+            print(f"  读取 control_register: {transaction.get_hex_value()}")
+            if transaction.parsed_data:
+                print(f"    解析数据: {transaction.parsed_data}")
+        except ValueError as e:
+            print(f"  错误: {e}")
+
+    except FileNotFoundError as e:
+        print(f"错误: 文件未找到 - {e}")
+    except Exception as e:
+        print(f"加载过程中发生错误: {e}")
+
+    # 9. 演示直接加载字典数据
+    print("\n=== 演示直接加载字典数据 ===")
+
+    # 创建示例数据
+    example_data = {
+        "metadata": {
+            "bank_name": "示例寄存器组",
+            "export_time": "2026-03-18T12:00:00",
+            "total_definitions": 2
+        },
+        "definitions": [
+            {
+                "address": 0x5000,
+                "address_hex": "0x00005000",
+                "name": "example_reg1",
+                "description": "示例寄存器1",
+                "has_parser": True,
+                "parser_type": "BitFieldParser"
+            },
+            {
+                "address": 0x6000,
+                "address_hex": "0x00006000",
+                "name": "example_reg2",
+                "description": "示例寄存器2",
+                "has_parser": False,
+                "parser_type": None
+            }
+        ]
+    }
+
+    # 创建一个新的寄存器组
+    example_bank = RegisterBank(access, "初始名称")
+
+    # 加载数据（不使用解析器工厂）
+    loaded_count = example_bank.load_definitions(example_data, overwrite=True)
+    print(f"从字典数据加载了 {loaded_count} 个寄存器定义")
+    print(f"寄存器组名称已更新为: {example_bank.name}")
+
+    # 显示定义
+    for i, defn in enumerate(example_bank.list_definitions(), 1):
+        parser_info = "有专属解析器" if defn.parser else "使用默认解析器"
+        print(f"  {i:2d}. {defn.name:20} (0x{defn.address:08x}): {defn.description} - {parser_info}")
 
     print("示例完成！")

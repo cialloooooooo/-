@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /e/claude_code/.git -type f -name \"*\" 2>/dev/null | head -20)",
+      "Bash(find /e/claude_code/.idea -type f -name \"*\" 2>/dev/null | head -20)",
+      "Bash(cd \"E:\\\\claude_code\" && python register_tool.py 2>&1 | head -50)",
+      "Bash(cd \"E:\\\\claude_code\" && python register_tool.py 2>&1 | head -100)",
+      "Bash(cd \"E:\\\\claude_code\" && python register_tool.py 2>&1 | tail -100)",
+      "Bash(cd \"E:\\\\claude_code\" && python test.py 2>&1)",
+      "Bash(cd \"E:\\\\claude_code\" && python register_tool.py 2>&1 | tail -20)",
+      "Bash(cd \"E:\\\\claude_code\" && python -m py_compile register_tool.py 2>&1)",
+      "Bash(cd \"E:\\\\claude_code\" && python test_new_features.py 2>&1)",
+      "Bash(cd \"E:\\\\claude_code\" && rm test_new_features.py)",
+      "Bash(cd \"E:\\\\claude_code\" && python -c \"from register_tool import MockRegisterAccess, RegisterBank, RegisterDefinition; access = MockRegisterAccess\\(\\); bank = RegisterBank\\(access\\); def1 = RegisterDefinition\\(0x1000, 'test', 'test'\\); bank.register_definition\\(def1\\); print\\('ok'\\)\" 2>&1)",
+      "Bash(cd \"E:\\\\claude_code\" && python register_tool.py 2>&1 | tail -150)",
+      "Bash(cd \"E:\\\\claude_code\" && python test_load_json.py 2>&1)"
+    ]
+  }
+}

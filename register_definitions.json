@@ -1,0 +1,33 @@
+{
+  "metadata": {
+    "bank_name": "测试寄存器组",
+    "export_time": "2026-03-18T22:32:17.703860",
+    "total_definitions": 3
+  },
+  "definitions": [
+    {
+      "address": 4096,
+      "address_hex": "0x00001000",
+      "name": "control_register",
+      "description": "控制寄存器",
+      "has_parser": true,
+      "parser_type": "BitFieldParser"
+    },
+    {
+      "address": 8192,
+      "address_hex": "0x00002000",
+      "name": "status_register",
+      "description": "状态寄存器",
+      "has_parser": false,
+      "parser_type": null
+    },
+    {
+      "address": 12288,
+      "address_hex": "0x00003000",
+      "name": "config_register",
+      "description": "配置寄存器",
+      "has_parser": true,
+      "parser_type": "BitFieldParser"
+    }
+  ]
+}

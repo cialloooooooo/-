@@ -1,8 +1,8 @@
 {
   "metadata": {
     "version": "1.0",
-    "created": "2026-03-05T00:26:19.696965",
-    "transaction_count": 5
+    "created": "2026-03-18T22:32:17.703482",
+    "transaction_count": 25
   },
   "transactions": [
     {
@@ -75,6 +75,290 @@
       "timestamp": 1772641579.696187,
       "parsed_data": {},
       "timestamp_iso": "2026-03-05T00:26:19.696187"
+    },
+    {
+      "address": 4096,
+      "mode": "write",
+      "raw_value": null,
+      "write_value": 15,
+      "timestamp": 1773835228.4287972,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:00:28.428797"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773835228.4288018,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T20:00:28.428802"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773835228.4288244,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T20:00:28.428824"
+    },
+    {
+      "address": 8192,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773835228.4288292,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:00:28.428829"
+    },
+    {
+      "address": 12288,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773835228.4288304,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:00:28.428830"
+    },
+    {
+      "address": 4096,
+      "mode": "write",
+      "raw_value": null,
+      "write_value": 15,
+      "timestamp": 1773835568.66697,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:06:08.666970"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773835568.6669753,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T20:06:08.666975"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773835568.666998,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T20:06:08.666998"
+    },
+    {
+      "address": 8192,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773835568.6670027,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:06:08.667003"
+    },
+    {
+      "address": 12288,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773835568.6670039,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:06:08.667004"
+    },
+    {
+      "address": 4096,
+      "mode": "write",
+      "raw_value": null,
+      "write_value": 15,
+      "timestamp": 1773835895.2978108,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:11:35.297811"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773835895.2978156,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T20:11:35.297816"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773835895.297836,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T20:11:35.297836"
+    },
+    {
+      "address": 8192,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773835895.2978406,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:11:35.297841"
+    },
+    {
+      "address": 12288,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773835895.2978423,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T20:11:35.297842"
+    },
+    {
+      "address": 4096,
+      "mode": "write",
+      "raw_value": null,
+      "write_value": 15,
+      "timestamp": 1773844337.7027786,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T22:32:17.702779"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773844337.7027829,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T22:32:17.702783"
+    },
+    {
+      "address": 4096,
+      "mode": "read",
+      "raw_value": 15,
+      "write_value": null,
+      "timestamp": 1773844337.7028027,
+      "parsed_data": {
+        "raw_value": 15,
+        "raw_hex": "0x0000000f",
+        "address": 4096,
+        "address_hex": "0x00001000",
+        "enable": 1,
+        "enable_bits": "0:0",
+        "mode": 7,
+        "mode_bits": "1:3",
+        "clock_div": 0,
+        "clock_div_bits": "4:7",
+        "status": 0,
+        "status_bits": "8:10"
+      },
+      "timestamp_iso": "2026-03-18T22:32:17.702803"
+    },
+    {
+      "address": 8192,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773844337.702808,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T22:32:17.702808"
+    },
+    {
+      "address": 12288,
+      "mode": "read",
+      "raw_value": 0,
+      "write_value": null,
+      "timestamp": 1773844337.702809,
+      "parsed_data": {},
+      "timestamp_iso": "2026-03-18T22:32:17.702809"
     }
   ]
 }
