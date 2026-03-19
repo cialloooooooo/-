@@ -13,7 +13,9 @@
       "Bash(cd \"E:\\\\claude_code\" && rm test_new_features.py)",
       "Bash(cd \"E:\\\\claude_code\" && python -c \"from register_tool import MockRegisterAccess, RegisterBank, RegisterDefinition; access = MockRegisterAccess\\(\\); bank = RegisterBank\\(access\\); def1 = RegisterDefinition\\(0x1000, 'test', 'test'\\); bank.register_definition\\(def1\\); print\\('ok'\\)\" 2>&1)",
       "Bash(cd \"E:\\\\claude_code\" && python register_tool.py 2>&1 | tail -150)",
-      "Bash(cd \"E:\\\\claude_code\" && python test_load_json.py 2>&1)"
+      "Bash(cd \"E:\\\\claude_code\" && python test_load_json.py 2>&1)",
+      "Bash(python -m py_compile register_tool.py)",
+      "Bash(python test_socket_register.py)"
     ]
   }
 }

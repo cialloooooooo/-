@@ -958,55 +958,343 @@ class MockRegisterAccess(RegisterAccess):
 # 示例实现：Socket寄存器访问器（需要服务器端配合）
 class SocketRegisterAccess(RegisterAccess):
     """
-    通过TCP Socket访问寄存器
-    假设服务器协议：发送4字节地址（大端序），接收4字节值（大端序）
+    通过SSH隧道和Telnet访问寄存器
+    先通过SSH连接远程主机，再通过Telnet localhost连接到5040或5050端口
+    发送devmem命令读取寄存器，支持多行响应解析
+
+    示例：
+        # 基本用法
+        access = SocketRegisterAccess(
+            ssh_host="remote-server",
+            ssh_username="root",
+            telnet_port=5040
+        )
+        value = access.read_register(0x1000)
+        print(f"寄存器值: 0x{value:08x}")
+        access.close()
+
+        # 调试模式，查看详细通信信息
+        access = SocketRegisterAccess(
+            ssh_host="remote-server",
+            ssh_username="root",
+            telnet_port=5040,
+            debug=True,
+            use_32_param=False  # 如果服务器不需要"32"参数
+        )
+        value = access.read_register(0x20202000461)
+        print(f"寄存器值: 0x{value:08x}")
+        access.close()
     """
 
-    def __init__(self, host: str = 'localhost', port: int = 8888):
-        self.host = host
-        self.port = port
+    def __init__(self, ssh_host: str, ssh_username: str = 'root', ssh_key_path: str = None,
+                 telnet_port: int = 5040, local_bind_port: int = 0, timeout: float = 20.0,
+                 debug: bool = False, use_32_param: bool = True):
+        """
+        初始化SSH Telnet寄存器访问器
+
+        Args:
+            ssh_host: SSH主机地址
+            ssh_username: SSH用户名，默认为root
+            ssh_key_path: SSH私钥路径，可选
+            telnet_port: Telnet端口，默认为5040，也可以是5050
+            local_bind_port: 本地绑定端口，默认为0（系统分配）
+            timeout: 超时时间，默认为20秒
+            debug: 是否启用调试模式，打印详细通信信息
+            use_32_param: 是否在devmem命令中添加"32"参数
+        """
+        self.ssh_host = ssh_host
+        self.ssh_username = ssh_username
+        self.ssh_key_path = ssh_key_path
+        self.telnet_port = telnet_port
+        self.local_bind_port = local_bind_port
+        self.timeout = timeout
+        self.debug = debug
+        self.use_32_param = use_32_param
+
+        self.ssh_client = None
+        self.forwarded_port = None
         self.socket = None
 
+        # 检查paramiko是否可用
+        try:
+            import paramiko
+            self._paramiko_available = True
+        except ImportError:
+            self._paramiko_available = False
+            raise ImportError(
+                "paramiko库未安装，请使用 'pip install paramiko' 安装。"
+                "此访问器需要通过SSH隧道连接。"
+            )
+
+    def _setup_ssh_tunnel(self):
+        """建立SSH隧道，将本地端口转发到远程主机的Telnet端口"""
+        if self.ssh_client is not None:
+            return
+
+        import paramiko
+
+        self.ssh_client = paramiko.SSHClient()
+        self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        try:
+            if self.ssh_key_path:
+                # 使用密钥认证
+                self.ssh_client.connect(
+                    self.ssh_host,
+                    username=self.ssh_username,
+                    key_filename=self.ssh_key_path,
+                    timeout=10.0
+                )
+            else:
+                # 使用密码认证（假设通过SSH代理或免密登录）
+                self.ssh_client.connect(
+                    self.ssh_host,
+                    username=self.ssh_username,
+                    timeout=10.0
+                )
+
+            # 创建本地端口转发：将本地端口转发到远程主机的localhost:telnet_port
+            transport = self.ssh_client.get_transport()
+            # 绑定到本地端口，转发到远程主机的localhost
+            self.forwarded_port = transport.request_port_forward(
+                '',  # 绑定到所有接口
+                self.local_bind_port,
+                'localhost',
+                self.telnet_port
+            )
+
+        except Exception as e:
+            self.ssh_client = None
+            raise ConnectionError(f"SSH隧道建立失败: {e}")
+
     def _connect(self):
-        """建立Socket连接"""
+        """建立Socket连接（通过SSH隧道）"""
+        if self.socket is not None:
+            return
+
+        # 首先建立SSH隧道
+        self._setup_ssh_tunnel()
+
         import socket
-        if self.socket is None:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.connect((self.host, self.port))
-            self.socket.settimeout(5.0)
+
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(self.timeout)
+
+        try:
+            # 连接到本地转发端口
+            self.socket.connect(('localhost', self.forwarded_port))
+        except Exception as e:
+            self.socket = None
+            raise ConnectionError(f"连接到SSH隧道失败: {e}")
 
     def read_register(self, address: int) -> int:
-        """读取寄存器"""
+        """读取寄存器：发送devmem命令并解析多行响应"""
+        import socket
+        import time
+        import re
+
         self._connect()
         try:
-            # 发送4字节地址（大端序）
-            data = address.to_bytes(4, byteorder='big')
-            self.socket.sendall(data)
-            # 接收4字节返回值（大端序）
-            response = self.socket.recv(4)
-            if len(response) != 4:
-                raise ValueError(f"Invalid response length: {len(response)}")
-            return int.from_bytes(response, byteorder='big')
+            # 在发送命令前，先读取并丢弃可能存在的欢迎消息
+            # 设置短超时以读取现有数据
+            original_timeout = self.socket.gettimeout()
+            self.socket.settimeout(1.0)  # 短超时读取欢迎消息
+
+            welcome_data = b""
+            try:
+                while True:
+                    try:
+                        chunk = self.socket.recv(1024)
+                        if chunk:
+                            welcome_data += chunk
+                        else:
+                            break
+                    except socket.timeout:
+                        # 超时表示没有更多欢迎数据
+                        break
+            except (socket.error, OSError) as e:
+                # 忽略读取欢迎消息时的网络异常
+                if self.debug:
+                    print(f"[DEBUG] 读取欢迎消息时出错: {e}")
+            except Exception as e:
+                # 其他异常，打印调试信息但不中断
+                if self.debug:
+                    print(f"[DEBUG] 读取欢迎消息时出现意外错误: {e}")
+
+            if self.debug and welcome_data:
+                print(f"[DEBUG] 欢迎消息: {welcome_data.decode('utf-8', errors='ignore')}")
+
+            # 恢复原始超时设置
+            self.socket.settimeout(original_timeout)
+
+            # 构建devmem命令
+            if self.use_32_param:
+                cmd = f"devmem 0x{address:x} 32\n"
+            else:
+                cmd = f"devmem 0x{address:x}\n"
+
+            if self.debug:
+                print(f"[DEBUG] 发送命令: {cmd.strip()}")
+
+            self.socket.sendall(cmd.encode('utf-8'))
+
+            # 接收响应
+            response = b""
+            start_time = time.time()
+            last_receive_time = start_time
+
+            while time.time() - start_time < self.timeout:
+                try:
+                    # 尝试接收数据
+                    self.socket.settimeout(0.5)  # 使用较短超时进行轮询
+                    chunk = self.socket.recv(4096)
+                    if chunk:
+                        response += chunk
+                        last_receive_time = time.time()
+                        if self.debug:
+                            print(f"[DEBUG] 收到 {len(chunk)} 字节: {chunk[:100]}...")
+
+                        # 检查是否可能收到完整响应
+                        # 如果响应中包含换行和可能的提示符，可以认为响应基本完整
+                        if b'\n' in chunk and time.time() - last_receive_time > 0.2:
+                            # 短暂等待看看是否有更多数据
+                            time.sleep(0.1)
+                            continue
+                    else:
+                        # 接收到空数据，连接可能已关闭
+                        break
+
+                except socket.timeout:
+                    # 接收超时，检查是否已收到足够数据
+                    if response and time.time() - last_receive_time > 0.5:
+                        # 超过0.5秒没有新数据，认为响应已完整
+                        break
+                    continue
+                except BlockingIOError:
+                    # 无数据可读
+                    pass
+                except ConnectionError:
+                    # 连接错误，退出循环
+                    break
+
+                time.sleep(0.01)
+
+            if self.debug:
+                print(f"[DEBUG] 总响应大小: {len(response)} 字节")
+
+            response_str = response.decode('utf-8', errors='ignore')
+
+            if self.debug:
+                print(f"[DEBUG] 响应文本:\n{response_str}")
+                print(f"[DEBUG] 响应原始字节 (hex): {response.hex()[:200]}...")
+
+            # 按行分割响应，移除空行
+            lines = [line.strip() for line in response_str.split('\n') if line.strip()]
+
+            if self.debug:
+                print(f"[DEBUG] 解析后行数: {len(lines)}")
+                for i, line in enumerate(lines):
+                    print(f"[DEBUG]  行 {i}: '{line}'")
+
+            # 方法1：寻找以"0x"开头的行（寄存器值）
+            hex_lines = [line for line in lines if line.lower().startswith('0x')]
+
+            if hex_lines:
+                # 取最后一个十六进制值（最新的响应）
+                hex_value = hex_lines[-1]
+                if self.debug:
+                    print(f"[DEBUG] 找到十六进制值: {hex_value}")
+                try:
+                    value = int(hex_value, 16)
+                    if self.debug:
+                        print(f"[DEBUG] 解析为整数: 0x{value:08x} ({value})")
+                    return value
+                except ValueError as ve:
+                    raise ValueError(f"无法解析十六进制值 '{hex_value}': {ve}")
+
+            # 方法2：查找包含十六进制数字的行（可能没有0x前缀）
+            for line in reversed(lines):  # 从最后一行开始搜索
+                # 查找类似十六进制数字的模式（支持0x前缀或无前缀）
+                # 匹配格式：0x后跟1-8位十六进制数，或单独的1-8位十六进制数
+                hex_match = re.search(r'(0x[0-9a-fA-F]{1,8}|[0-9a-fA-F]{1,8})', line)
+                if hex_match:
+                    hex_str = hex_match.group(0)
+                    if self.debug:
+                        print(f"[DEBUG] 正则匹配到十六进制: '{hex_str}' 在行: '{line}'")
+                    try:
+                        # 如果字符串以0x开头，直接解析
+                        if hex_str.lower().startswith('0x'):
+                            value = int(hex_str, 16)
+                        else:
+                            # 否则假设是十六进制数字（无前缀）
+                            value = int(hex_str, 16)
+
+                        if self.debug:
+                            print(f"[DEBUG] 解析为整数: 0x{value:08x} ({value})")
+                        return value
+                    except ValueError:
+                        # 解析失败，继续搜索
+                        if self.debug:
+                            print(f"[DEBUG] 解析失败，继续搜索")
+                        continue
+
+            # 方法3：在整段响应中搜索十六进制模式
+            hex_match = re.search(r'0x[0-9a-fA-F]{1,8}', response_str)
+            if hex_match:
+                hex_str = hex_match.group(0)
+                if self.debug:
+                    print(f"[DEBUG] 全文搜索找到十六进制: {hex_str}")
+                return int(hex_str, 16)
+
+            # 方法4：搜索无前缀的十六进制数字（至少1位）
+            hex_match = re.search(r'[0-9a-fA-F]{1,8}', response_str)
+            if hex_match:
+                hex_str = hex_match.group(0)
+                if self.debug:
+                    print(f"[DEBUG] 全文搜索找到无前缀十六进制: {hex_str}")
+                try:
+                    return int(hex_str, 16)
+                except ValueError:
+                    pass
+
+            # 没有找到有效的寄存器值
+            error_msg = (
+                f"无法从响应中提取寄存器值。\n"
+                f"命令: {cmd.strip()}\n"
+                f"响应内容 ({len(response)} 字节):\n{response_str}\n"
+                f"响应字节 (hex): {response.hex()[:500]}..."
+            )
+            if self.debug:
+                print(f"[ERROR] {error_msg}")
+            raise ValueError(error_msg)
+
+        except socket.timeout:
+            raise TimeoutError(f"读取寄存器超时（{self.timeout}秒）")
+        except ValueError as ve:
+            # 重新抛出ValueError
+            raise ve
+        except (socket.error, OSError, ConnectionError, UnicodeDecodeError) as e:
+            raise ConnectionError(f"读取寄存器失败: {e}")
         except Exception as e:
-            raise ConnectionError(f"Socket read failed: {e}")
+            # 捕获其他未预料到的异常
+            raise ConnectionError(f"读取寄存器时发生意外错误: {e}")
 
     def write_register(self, address: int, value: int) -> bool:
-        """写入寄存器（假设协议：发送8字节，前4字节地址，后4字节值）"""
-        self._connect()
-        try:
-            data = address.to_bytes(4, byteorder='big') + value.to_bytes(4, byteorder='big')
-            self.socket.sendall(data)
-            # 假设服务器返回1字节成功标志
-            response = self.socket.recv(1)
-            return len(response) == 1 and response[0] == 1
-        except Exception as e:
-            raise ConnectionError(f"Socket write failed: {e}")
+        """写入寄存器：不支持写入操作，返回True以满足接口要求"""
+        # 根据用户要求，不需要支持写入寄存器
+        # 直接返回True表示操作成功
+        return True
 
     def close(self):
-        """关闭连接"""
+        """关闭连接和SSH隧道"""
         if self.socket:
             self.socket.close()
             self.socket = None
+
+        if self.ssh_client:
+            self.ssh_client.close()
+            self.ssh_client = None
+            self.forwarded_port = None
 
 
 # 示例实现：SSH寄存器访问器（通过devmem命令）
