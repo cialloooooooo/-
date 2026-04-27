@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<defs fill="none">
+    <linearGradient id="_未命名的渐变" x1="-1285.88" y1="25.63" x2="-1286.89" y2="25.13" gradientTransform="translate(38096.4 -732.8) scale(29.6)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#191919" stop-opacity="0"/>
+      <stop offset="1" stop-color="#191919"/>
+    </linearGradient>
+  </defs>
+	<mask fill="none" id="mask68_48917" mask-type="alpha" maskUnits="userSpaceOnUse" x="0.000000" y="0.000000">
+    <path id="Stroke-2" fill='url(#_未命名的渐变)' d="m16,1.2c1,0,1.8.8,1.8,1.8s-.8,1.8-1.8,1.8c-6.2,0-11.2,5-11.2,11.2s5,11.2,11.2,11.2,11.2-5,11.2-11.2c0-1,.8-1.8,1.8-1.8s1.8.8,1.8,1.8c0,8.2-6.6,14.8-14.8,14.8S1.2,24.2,1.2,16,7.8,1.2,16,1.2Z">
+      <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 16 16" to="360 16 16" dur="1s" repeatCount="indefinite"></animateTransform>
+    </path>
+	</mask>
+	<g mask="url(#mask68_48917)">
+		<path id="Fill-1" d="M-0.1 32L32 32L32 -0.11L-0.1 -0.11L-0.1 32Z" fill-opacity="1.000000" fill-rule="evenodd"/>
+	</g>
+</svg>

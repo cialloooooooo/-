@@ -1,0 +1,14 @@
+{
+  "name": "web-admin-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -C packages/web-admin dev",
+    "build": "pnpm -C packages/web-admin build",
+    "preview": "pnpm -C packages/web-admin preview",
+    "lint": "pnpm -C packages/web-admin lint"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  }
+}

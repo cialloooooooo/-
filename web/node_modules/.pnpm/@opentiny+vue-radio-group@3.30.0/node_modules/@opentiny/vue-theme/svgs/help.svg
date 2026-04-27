@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: var(--tv-color-icon-control-active);
+      }
+
+      .cls-1, .cls-2 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path id="_路径" data-name="路径" class="cls-1" d="m8,1c-3.87,0-7,3.13-7,7s3.13,7,7,7,7-3.14,7-7S11.86,1,8,1Z"/>
+  <path id="_形状结合" data-name="形状结合" class="cls-2" d="m7.93,5.71c-.47,0-.87-.39-.87-.87s.4-.84.87-.84.85.38.85.86-.38.85-.85.85Zm-.6,6.79c-.28,0-.5-.22-.5-.5s.22-.5.5-.5h.3v-4h-.08c-.25,0-.45-.18-.49-.41v-.09c0-.28.22-.5.49-.5h1.08v5h.3c.28,0,.5.22.5.5s-.22.5-.5.5h-1.6Z"/>
+</svg>
