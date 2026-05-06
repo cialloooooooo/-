@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>点云渲染演示 - PointCloudRenderer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#eee;overflow:hidden;height:100vh}
+.toolbar{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(26,26,46,0.95);backdrop-filter:blur(10px);padding:12px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.1);flex-wrap:wrap}
+.toolbar h1{font-size:16px;font-weight:600;color:#e94560;margin-right:16px;white-space:nowrap}
+.toolbar label{font-size:13px;color:#aaa;white-space:nowrap}
+.toolbar select,.toolbar input[type="range"]{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#eee;padding:4px 8px;border-radius:4px;font-size:13px}
+.toolbar select option{background:#1a1a2e}
+.toolbar button{background:#e94560;color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:13px;transition:background .2s}
+.toolbar button:hover{background:#d63851}
+.toolbar button.secondary{background:rgba(255,255,255,0.1)}
+.toolbar button.secondary:hover{background:rgba(255,255,255,0.2)}
+.toolbar .info{font-size:12px;color:#888;margin-left:auto}
+#fileInput{display:none}
+#chart-container{position:fixed;top:56px;left:0;right:0;bottom:0}
+.coord-panel{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:14px 28px;display:none;align-items:center;gap:24px;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.4);user-select:none}
+.coord-panel.active{display:flex}
+.coord-panel .coord-item{display:flex;align-items:center;gap:8px}
+.coord-panel .coord-label{color:#888;font-size:12px;font-weight:500}
+.coord-panel .coord-value{color:#fff;font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;min-width:60px}
+.coord-panel .coord-value.x{color:#ff6b6b}
+.coord-panel .coord-value.y{color:#51cf66}
+.coord-panel .coord-value.z{color:#5c7cfa}
+.coord-panel .coord-index{color:#888;font-size:12px;padding-left:16px;border-left:1px solid rgba(255,255,255,0.15)}
+.coord-panel .coord-close{color:#666;cursor:pointer;font-size:18px;line-height:1;padding:0 4px;transition:color .2s}
+.coord-panel .coord-close:hover{color:#e94560}
+.loading-overlay{position:fixed;top:56px;left:0;right:0;bottom:0;background:rgba(26,26,46,0.8);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:50}
+.loading-overlay.active{display:flex}
+.loading-spinner{width:48px;height:48px;border:3px solid rgba(233,69,96,0.2);border-top-color:#e94560;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{margin-top:16px;font-size:14px;color:#aaa}
+.loading-progress{margin-top:8px;font-size:12px;color:#888}
+.error-toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#e94560;color:#fff;padding:10px 24px;border-radius:6px;font-size:14px;z-index:200;display:none;box-shadow:0 4px 12px rgba(233,69,96,0.3)}
+.error-toast.active{display:block;animation:slideDown .3s ease}
+@keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+@media(max-width:768px){.toolbar{padding:8px 12px;gap:8px}.toolbar h1{font-size:14px;margin-right:8px}.toolbar .info{display:none}#chart-container{top:48px}.coord-panel{padding:10px 16px;gap:12px;font-size:12px;bottom:12px;flex-wrap:wrap;justify-content:center}.coord-panel .coord-value{min-width:40px;font-size:13px}.coord-panel .coord-index{padding-left:8px}}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+<h1>✦ 点云渲染</h1>
+<label>渲染模式:</label><select id="modeSelect"><option value="3d">3D</option><option value="2d">2D</option></select>
+<label>点大小:</label><input type="range" id="pointSize" min="0.5" max="5" step="0.5" value="1">
+<label><input type="checkbox" id="autoRotate" checked> 自动旋转</label>
+<button id="loadSampleBtn" class="secondary">加载示例数据</button>
+<button id="loadFileBtn" class="secondary">选择文件</button>
+<input type="file" id="fileInput" accept=".txt">
+<span class="info" id="infoText">就绪</span>
+</div>
+
+<div id="chart-container"></div>
+
+<div class="coord-panel" id="coordPanel">
+<div class="coord-item"><span class="coord-label">X</span><span class="coord-value x" id="coordX">0.00</span></div>
+<div class="coord-item"><span class="coord-label">Y</span><span class="coord-value y" id="coordY">0.00</span></div>
+<div class="coord-item"><span class="coord-label">Z</span><span class="coord-value z" id="coordZ">0.00</span></div>
+<span class="coord-index" id="coordIndex">#0</span>
+<span class="coord-close" id="coordClose" title="取消选中">✕</span>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+<div class="loading-spinner"></div>
+<div class="loading-text">正在解析数据...</div>
+<div class="loading-progress" id="progressText"></div>
+</div>
+
+<div class="error-toast" id="errorToast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+
+<script>
+// ========== 核心库 ==========
+class PointCloudRenderer{
+constructor(dom,o={}){
+if(new.target===PointCloudRenderer)throw Error('抽象类')
+this.dom=typeof dom==='string'?document.getElementById(dom):dom
+if(!this.dom)throw Error('无效DOM容器')
+this.o={renderMode:'3d',autoResize:true,pointSize:1,animationDuration:0,colorMapper:null,chartOptions:{},onRenderProgress:null,...o}
+this.chart=null;this.points=[];this.dataRange={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,minZ:Infinity,maxZ:-Infinity}
+this._init=false;this._rh=null
+}
+init(){
+if(this._init)return this
+this.chart=echarts.init(this.dom)
+if(this.o.autoResize){this._rh=()=>this.chart&&this.chart.resize();window.addEventListener('resize',this._rh)}
+this._init=true;return this
+}
+setData(p){
+if(!Array.isArray(p))throw Error('点数据必须是数组')
+this.points=p;const r={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,minZ:Infinity,maxZ:-Infinity}
+for(let i=0,l=p.length;i<l;i++){const d=p[i];if(d.x<r.minX)r.minX=d.x;if(d.x>r.maxX)r.maxX=d.x;if(d.y<r.minY)r.minY=d.y;if(d.y>r.maxY)r.maxY=d.y;if(d.z<r.minZ)r.minZ=d.z;if(d.z>r.maxZ)r.maxZ=d.z}
+this.dataRange=r;return this
+}
+static colorMap(z,mn,mx){if(mn===mx)return'#5470c6';const t=(z-mn)/(mx-mn);return'rgb('+Math.min(255,Math.floor(t*510))+','+Math.min(255,Math.floor((1-Math.abs(t-.5)*2)*255))+','+Math.min(255,Math.floor((1-t)*510))+')'}
+_gc(z){const{minZ,maxZ}=this.dataRange;return this.o.colorMapper?this.o.colorMapper(z,minZ,maxZ):PointCloudRenderer.colorMap(z,minZ,maxZ)}
+render(){throw Error('子类必须实现render()')}
+update(p){this.setData(p);return this.render()}
+dispose(){if(this._rh){window.removeEventListener('resize',this._rh);this._rh=null}if(this.chart){this.chart.dispose();this.chart=null}this.points=[];this._init=false}
+getChart(){return this.chart}
+getDataRange(){return{...this.dataRange}}
+}
+
+class PointCloud3DRenderer extends PointCloudRenderer{
+constructor(dom,o={}){
+super(dom,{renderMode:'3d',...o})
+this.o={...this.o,pointSize:o.pointSize??1,autoRotate:o.autoRotate??false,autoRotateSpeed:o.autoRotateSpeed??10,progressive:o.progressive??5000,progressiveThreshold:o.progressiveThreshold??30000,grid3D:o.grid3D??{},onPointClick:o.onPointClick||null,enableClick:o.enableClick!==false}
+this._sel=-1;this._cb=false
+}
+init(){super.init();if(this.o.enableClick)this._bindClick();return this}
+_bindClick(){
+if(this._cb||!this.chart)return
+this.chart.on('click','series.scatter3D',p=>{
+const d=p.data,i=p.dataIndex;if(!d)return
+const pt={x:d[0],y:d[1],z:d[2],index:i}
+this._sel=i;this.chart.dispatchAction({type:'highlight',seriesIndex:0,dataIndex:i})
+if(this.o.onPointClick)this.o.onPointClick(pt)
+})
+this.chart.getZr().on('click',p=>{if(!p.target)this.clearSel()})
+this._cb=true
+}
+clearSel(){if(this._sel>=0&&this.chart){this.chart.dispatchAction({type:'downplay',seriesIndex:0});this._sel=-1;if(this.o.onPointClick)this.o.onPointClick(null)}return this}
+getSel(){return this._sel<0||!this.points[this._sel]?null:{...this.points[this._sel],index:this._sel}}
+render(){
+if(!this._init)throw Error('请先调用init()')
+console.log('[3DRenderer] render() 开始, 点数:', this.points.length)
+const{minX,maxX,minY,maxY,minZ,maxZ}=this.dataRange
+console.log('[3DRenderer] 数据范围:', {minX,maxX,minY,maxY,minZ,maxZ})
+const data=new Array(this.points.length)
+const rp=this.o.onRenderProgress
+for(let i=0;i<this.points.length;i++){const p=this.points[i];data[i]=[p.x,p.y,p.z,this._gc(p.z)];if(rp&&i%Math.max(1,Math.floor(this.points.length/100))===0)rp((i+1)/this.points.length)}
+console.log('[3DRenderer] 数据数组构建完成, 长度:', data.length)
+const rx=maxX-minX||1,ry=maxY-minY||1,rz=maxZ-minZ||1,mr=Math.max(rx,ry,rz)
+console.log('[3DRenderer] 范围尺寸:', {rx,ry,rz,mr})
+console.log('[3DRenderer] 即将调用 chart.setOption()')
+this.chart.setOption({
+tooltip:{formatter:p=>'X: '+p.data[0].toFixed(2)+'<br/>Y: '+p.data[1].toFixed(2)+'<br/>Z: '+p.data[2].toFixed(2)},
+grid3D:{show:true,boxWidth:100,boxHeight:100,boxDepth:100,axisPointer:{show:false},viewControl:{autoRotate:this.o.autoRotate,autoRotateSpeed:this.o.autoRotateSpeed,distance:Math.max(mr*2.5,100),minDistance:10,maxDistance:500,alpha:30,beta:45},postEffect:{enable:false},light:{main:{intensity:1.2,shadow:false},ambient:{intensity:0.6}},...this.o.grid3D},
+xAxis3D:{type:'value',name:'X',min:minX,max:maxX},
+yAxis3D:{type:'value',name:'Y',min:minY,max:maxY},
+zAxis3D:{type:'value',name:'Z',min:minZ,max:maxZ},
+series:[{type:'scatter3D',data,symbolSize:this.o.pointSize,itemStyle:{color:p=>p.data[3],opacity:.8},progressive:this.o.progressive,progressiveThreshold:this.o.progressiveThreshold,animation:false,selectedMode:this.o.enableClick?'single':false,label:{show:false},emphasis:{scale:true,focus:'series',label:{show:true,formatter:p=>'('+p.data[0].toFixed(1)+', '+p.data[1].toFixed(1)+', '+p.data[2].toFixed(1)+')',position:'top',fontSize:12,color:'#fff',backgroundColor:'rgba(0,0,0,0.6)',padding:[4,8],borderRadius:4}},blendMode:'source-over'}],
+...this.o.chartOptions
+},true)
+console.log('[3DRenderer] chart.setOption() 调用完成')
+if(this.o.enableClick&&!this._cb)this._bindClick()
+if(rp)rp(1)
+return this
+}
+setAutoRotate(e,s){this.o.autoRotate=e;if(s!==undefined)this.o.autoRotateSpeed=s;if(this._init)this.render();return this}
+setPointSize(s){this.o.pointSize=s;if(this._init)this.render();return this}
+dispose(){if(this.chart&&this._cb){this.chart.off('click');if(this.chart.getZr())this.chart.getZr().off('click')}this._cb=false;this._sel=-1;super.dispose()}
+}
+
+class PointCloud2DRenderer extends PointCloudRenderer{
+constructor(dom,o={}){super(dom,{renderMode:'2d',...o});this.o={...this.o,pointSize:o.pointSize??2,symbol:o.symbol??'circle',showGrid:o.showGrid??true,sampling:o.sampling??false,progressive:o.progressive??5000,progressiveThreshold:o.progressiveThreshold??30000}}
+render(){
+if(!this._init)throw Error('请先调用init()')
+console.log('[2DRenderer] render() 开始, 点数:', this.points.length)
+const{minX,maxX,minY,maxY,minZ,maxZ}=this.dataRange
+console.log('[2DRenderer] 数据范围:', {minX,maxX,minY,maxY,minZ,maxZ})
+const data=new Array(this.points.length)
+const rp=this.o.onRenderProgress
+for(let i=0;i<this.points.length;i++){const p=this.points[i];data[i]=[p.x,p.y,p.z,this._gc(p.z)];if(rp&&i%Math.max(1,Math.floor(this.points.length/100))===0)rp((i+1)/this.points.length)}
+console.log('[2DRenderer] 数据数组构建完成, 长度:', data.length)
+console.log('[2DRenderer] 即将调用 chart.setOption()')
+this.chart.setOption({
+tooltip:{formatter:p=>'X: '+p.data[0].toFixed(2)+'<br/>Y: '+p.data[1].toFixed(2)+'<br/>Z: '+p.data[2].toFixed(2)},
+grid:{show:this.o.showGrid,left:'10%',right:'10%',bottom:'10%',top:'10%',containLabel:true},
+xAxis:{type:'value',name:'X',min:minX,max:maxX,splitLine:{show:this.o.showGrid}},
+yAxis:{type:'value',name:'Y',min:minY,max:maxY,splitLine:{show:this.o.showGrid}},
+visualMap:{show:true,min:minZ,max:maxZ,dimension:2,inRange:{color:['#313695','#4575b4','#74add1','#abd9e9','#fee090','#fdae61','#f46d43','#d73027']},calculable:true,text:['高Z','低Z'],textStyle:{color:'#333'}},
+series:[{type:'scatter',data,symbolSize:this.o.pointSize,symbol:this.o.symbol,itemStyle:{color:p=>p.data[3],opacity:.7},progressive:this.o.progressive,progressiveThreshold:this.o.progressiveThreshold,sampling:this.o.sampling?'lttb':'none',animation:false,label:{show:false},emphasis:{scale:false,label:{show:false}}}],
+...this.o.chartOptions
+},true)
+console.log('[2DRenderer] chart.setOption() 调用完成')
+if(rp)rp(1)
+return this
+}
+setPointSize(s){this.o.pointSize=s;if(this._init)this.render();return this}
+setSymbol(s){this.o.symbol=s;if(this._init)this.render();return this}
+toggleGrid(s){this.o.showGrid=s;if(this._init)this.render();return this}
+}
+
+class TxtPointParser{
+constructor(o={}){this.o={validate:true,maxPoints:1e6,onProgress:null,...o}}
+parse(c){
+if(!c||typeof c!=='string')throw Error('文件内容不能为空')
+const lines=c.split(/\r?\n/);if(lines.length<2)throw Error('文件内容至少需要两行')
+const mode=(()=>{const m=lines[0].trim().toLowerCase();if(m!=='3d'&&m!=='2d')throw Error('无效渲染模式："'+lines[0].trim()+'"，必须为"3d"或"2d"');return m})()
+const pts=[];const rp=this.o.onProgress
+for(let i=1;i<lines.length;i++){
+const l=lines[i].trim();if(!l)continue
+if(pts.length>=this.o.maxPoints){console.warn('达到最大解析点数限制('+this.o.maxPoints+')，已截断');break}
+const p=l.split(/\s+/);if(p.length<3){if(this.o.validate)throw Error('第'+(i+1)+'行格式错误：需要至少3个数值(x y z)，实际为'+p.length+'个');continue}
+const x=parseFloat(p[0]),y=parseFloat(p[1]),z=parseFloat(p[2])
+if(this.o.validate){if(isNaN(x)||isNaN(y)||isNaN(z))throw Error('第'+(i+1)+'行包含无效数值：'+l);if(!isFinite(x)||!isFinite(y)||!isFinite(z))throw Error('第'+(i+1)+'行包含无穷大值：'+l)}
+pts.push({x,y,z})
+if(rp&&i%Math.max(1,Math.floor(lines.length/100))===0)rp(i/lines.length)
+}
+if(pts.length===0)throw Error('未解析到任何有效坐标数据')
+return{mode,points:pts}
+}
+parseFile(f){return new Promise((a,b)=>{if(!f){b(Error('文件不能为空'));return}const r=new FileReader();r.onload=e=>{try{a(this.parse(e.target.result))}catch(err){b(err)}};r.onerror=()=>b(Error('文件读取失败'));r.onprogress=e=>{if(this.o.onProgress&&e.lengthComputable)this.o.onProgress(e.loaded/e.total)};r.readAsText(f)})}
+}
+
+class PointCloudManager{
+constructor(dom,o={}){this.dom=dom;this.o={renderMode:'3d',rendererOptions:{},parserOptions:{},onProgress:null,onReady:null,onError:null,onRenderProgress:null,...o};this.renderer=null;this.parser=null;this.mode=null;this._init=false}
+init(mode){
+if(this._init)this.dispose()
+this.mode=mode||this.o.renderMode
+const opts={...this.o.rendererOptions,onRenderProgress:this.o.onRenderProgress}
+console.log('[Manager] init() 模式:', this.mode, 'opts:', opts)
+this.renderer=this.mode==='3d'?new PointCloud3DRenderer(this.dom,opts):new PointCloud2DRenderer(this.dom,opts)
+this.renderer.init();this._init=true;return this
+}
+setData(p){if(!this._init)throw Error('请先调用init()');console.log('[Manager] setData() 点数:', p.length);this.renderer.setData(p);return this}
+render(){if(!this._init)throw Error('请先调用init()');console.log('[Manager] render() 开始');this.renderer.render();if(this.o.onReady)this.o.onReady(this.renderer);return this}
+async loadFromContent(c){try{console.log('[Manager] loadFromContent() 开始, 内容长度:', c.length);this.parser=new TxtPointParser({...this.o.parserOptions,onProgress:this.o.onProgress});const{mode,points}=this.parser.parse(c);console.log('[Manager] 解析完成, 模式:', mode, '点数:', points.length);this.init(mode);this.setData(points);this.render();return this}catch(e){console.error('[Manager] loadFromContent 错误:', e);if(this.o.onError)this.o.onError(e);throw e}}
+async loadFromFile(f){try{this.parser=new TxtPointParser({...this.o.parserOptions,onProgress:this.o.onProgress});const{mode,points}=await this.parser.parseFile(f);this.init(mode);this.setData(points);this.render();return this}catch(e){if(this.o.onError)this.o.onError(e);throw e}}
+switchMode(mode){if(mode===this.mode)return this;const pts=this.renderer?this.renderer.points:[];this.init(mode);if(pts.length>0){this.setData(pts);this.render()}return this}
+getRenderer(){return this.renderer}
+getMode(){return this.mode}
+dispose(){if(this.renderer){this.renderer.dispose();this.renderer=null}this.parser=null;this._init=false;this.mode=null}
+}
+
+// ========== 演示页面 ==========
+(function(){
+'use strict';
+
+// 示例数据（sample-data.txt）
+const SAMPLE_DATA='3d\n'+Array.from({length:101},(_,i)=>i+' '+i+' '+i).join('\n');
+
+const $=id=>document.getElementById(id);
+const container=$('chart-container');
+const modeSelect=$('modeSelect'),pointSizeInput=$('pointSize'),autoRotateCheck=$('autoRotate');
+const loadSampleBtn=$('loadSampleBtn'),loadFileBtn=$('loadFileBtn'),fileInput=$('fileInput');
+const infoText=$('infoText'),loadingOverlay=$('loadingOverlay'),progressText=$('progressText');
+const errorToast=$('errorToast'),coordPanel=$('coordPanel');
+const coordX=$('coordX'),coordY=$('coordY'),coordZ=$('coordZ'),coordIndex=$('coordIndex'),coordClose=$('coordClose');
+
+let manager=null,errTimer=null;
+
+function showError(msg){errorToast.textContent=msg;errorToast.classList.add('active');clearTimeout(errTimer);errTimer=setTimeout(()=>errorToast.classList.remove('active'),4000)}
+function showLoading(s){loadingOverlay.classList.toggle('active',s)}
+function updateProgress(p){progressText.textContent=Math.round(p*100)+'%'}
+function updateInfo(t){infoText.textContent=t}
+function showCoordInfo(pt){
+if(!pt){coordPanel.classList.remove('active');return}
+coordX.textContent=pt.x.toFixed(2);coordY.textContent=pt.y.toFixed(2);coordZ.textContent=pt.z.toFixed(2)
+coordIndex.textContent='#'+pt.index;coordPanel.classList.add('active')
+}
+
+async function loadAndRender(content){
+try{
+showLoading(true);updateProgress(0);updateInfo('解析中...')
+if(manager)manager.dispose()
+manager=new PointCloudManager(container,{
+rendererOptions:{onPointClick:showCoordInfo},
+onProgress:p=>{updateProgress(p);updateInfo('解析中 '+Math.round(p*100)+'%')},
+onRenderProgress:p=>{updateProgress(p);updateInfo('渲染中 '+Math.round(p*100)+'%')},
+onReady:r=>{updateInfo(r.points.length.toLocaleString()+' 个点 | '+r.o.renderMode.toUpperCase()+' 模式');showLoading(false)},
+onError:e=>{showError(e.message);showLoading(false)}
+})
+console.log('[Demo] loadAndRender: 开始调用 manager.loadFromContent()')
+await manager.loadFromContent(content)
+console.log('[Demo] loadAndRender: loadFromContent 完成')
+const mode=manager.getMode();modeSelect.value=mode
+if(mode==='3d'){const r=manager.getRenderer();if(r&&r.setAutoRotate)r.setAutoRotate(autoRotateCheck.checked)}
+}catch(e){console.error('[Demo] loadAndRender 错误:', e);showError(e.message);showLoading(false)}
+}
+
+function loadSampleData(){loadAndRender(SAMPLE_DATA)}
+
+loadSampleBtn.addEventListener('click',loadSampleData)
+loadFileBtn.addEventListener('click',()=>fileInput.click())
+fileInput.addEventListener('change',async e=>{
+const f=e.target.files[0];if(!f)return
+try{showLoading(true);updateProgress(0);updateInfo('读取文件中...');await loadAndRender(await f.text())}catch(e){showError(e.message);showLoading(false)}
+fileInput.value=''
+})
+
+modeSelect.addEventListener('change',()=>{
+const mode=modeSelect.value;if(!manager)return
+try{showLoading(true);manager.switchMode(mode)
+if(mode==='3d'){const r=manager.getRenderer();if(r&&r.setAutoRotate)r.setAutoRotate(autoRotateCheck.checked)}
+const r=manager.getRenderer();updateInfo((r?r.points.length:0).toLocaleString()+' 个点 | '+mode.toUpperCase()+' 模式');showLoading(false)
+}catch(e){showError(e.message);showLoading(false)}
+})
+
+pointSizeInput.addEventListener('input',()=>{
+const s=parseFloat(pointSizeInput.value);if(!manager)return
+const r=manager.getRenderer();if(r&&r.setPointSize)r.setPointSize(s)
+})
+
+autoRotateCheck.addEventListener('change',()=>{
+if(!manager)return;const r=manager.getRenderer();if(r&&r.setAutoRotate)r.setAutoRotate(autoRotateCheck.checked)
+})
+
+coordClose.addEventListener('click',()=>{if(manager){const r=manager.getRenderer();if(r&&r.clearSel)r.clearSel()}})
+
+window.addEventListener('resize',()=>{if(manager){const r=manager.getRenderer();if(r&&r.chart)r.chart.resize()}})
+document.addEventListener('keydown',e=>{if(e.key==='o'&&(e.ctrlKey||e.metaKey)){e.preventDefault();fileInput.click()}})
+
+window.addEventListener('load',()=>setTimeout(loadSampleData,300))
+})();
+</script>
+</body>
+</html>
