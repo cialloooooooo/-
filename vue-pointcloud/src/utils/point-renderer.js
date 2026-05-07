@@ -1,15 +1,23 @@
 /**
  * ============================================================
- *  PointRenderer — 点云渲染引擎  v1.0
+ *  PointRenderer — 点云渲染引擎  v1.1
  * ============================================================
  *  支持 3D 散点图（50万+点）和 2D 多边形两种模式。
- *
- *  依赖：echarts >= 5.5.0、echarts-gl >= 2.0.9
  *  零 DOM 耦合，不依赖任何框架。
  *
- * ─── 移植到其他项目 ───────────────────────────────────────
+ *  依赖：echarts >= 5.5.0、echarts-gl >= 2.0.9
  *
- *  方式 1：浏览器 <script> 标签
+ * ─── 使用方式 ──────────────────────────────────────────────
+ *
+ *  安装依赖（缺一不可）：
+ *    pnpm add echarts echarts-gl
+ *
+ *  Vue / React 项目（推荐，自包含）：
+ *    import PointRenderer from './point-renderer.js';
+ *    const pr = new PointRenderer(document.getElementById('chart'));
+ *    pr.parseAndRender(fileText, (pct) => console.log(pct + '%'));
+ *
+ *  浏览器 <script> 方式：
  *    <script src="echarts.min.js"></script>
  *    <script src="echarts-gl.min.js"></script>
  *    <script src="point-renderer.js"></script>
@@ -17,14 +25,6 @@
  *      var pr = new PointRenderer(document.getElementById('chart'));
  *      pr.parseAndRender(fileText, function(pct) { console.log(pct + '%'); });
  *    </script>
- *
- *  方式 2：ES Module / Webpack / Vite
- *    import PointRenderer from './point-renderer.js';
- *    // 确保 echarts 和 echarts-gl 已全局可用（或通过 import 引入）
- *
- *  方式 3：React / Vue
- *    在组件 mounted 时 new PointRenderer(this.$refs.container)
- *    在组件 unmounted 时调用 renderer.dispose()
  *
  * ─── API 速览 ──────────────────────────────────────────────
  *
@@ -50,6 +50,9 @@
  *
  * ============================================================
  */
+import * as echarts from 'echarts';
+import 'echarts-gl';
+
 (function(root, factory) {
   // UMD 包装：兼容 <script> / CommonJS / AMD / ES Module
   if (typeof define === 'function' && define.amd) {
