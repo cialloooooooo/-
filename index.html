@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>点云渲染器 - Point Cloud Renderer</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+<script src="point-renderer.js"></script>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --text: #e0e0e0;
+  --accent: #0f3460;
+  --highlight: #e94560;
+  --border: #2a2a4a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 顶部工具栏 */
+.toolbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 20px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0; z-index: 100;
+}
+.toolbar .brand {
+  font-size: 18px; font-weight: 700;
+  background: linear-gradient(135deg, #e94560, #0f3460);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-right: 8px;
+}
+.toolbar label.file-btn {
+  padding: 8px 20px; background: var(--accent); color: #fff;
+  border-radius: 6px; cursor: pointer; font-size: 14px;
+  transition: opacity .2s;
+}
+.toolbar label.file-btn:hover { opacity: .85; }
+.toolbar input[type=file] { display: none; }
+.toolbar .mode-badge {
+  padding: 4px 12px; border-radius: 4px; font-size: 13px;
+  background: var(--border); color: #aaa;
+}
+.toolbar .mode-badge.active {
+  background: var(--highlight); color: #fff;
+}
+.toolbar .info { margin-left: auto; font-size: 13px; color: #888; }
+
+/* 进度条 */
+.progress-wrap {
+  height: 3px; background: var(--border); flex-shrink: 0;
+  position: relative; opacity: 0; transition: opacity .3s;
+}
+.progress-wrap.visible { opacity: 1; }
+.progress-bar {
+  height: 100%; background: var(--highlight);
+  width: 0%; transition: width .1s linear;
+}
+.progress-text {
+  position: absolute; right: 8px; top: -22px;
+  font-size: 12px; color: #ccc;
+}
+
+/* 图表容器 */
+.chart-container {
+  flex: 1; position: relative; min-height: 0;
+}
+.chart-container .chart {
+  width: 100%; height: 100%;
+}
+
+/* 浮动信息面板 */
+.info-panel {
+  position: absolute; bottom: 20px; left: 20px;
+  background: rgba(22,33,62,.92); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 18px; font-size: 13px;
+  min-width: 180px; backdrop-filter: blur(10px);
+  display: none; z-index: 50;
+}
+.info-panel.visible { display: block; }
+.info-panel .title { font-size: 11px; color: #888; margin-bottom: 6px; }
+.info-panel .coord { font-size: 15px; font-weight: 600; color: #fff; }
+.info-panel .coord span { color: var(--highlight); }
+
+/* 空状态 */
+.empty-state {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  text-align: center; color: #555;
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* 图例提示 */
+.legend-hint {
+  position: absolute; top: 16px; right: 20px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: #888;
+}
+.legend-gradient {
+  width: 120px; height: 12px; border-radius: 2px;
+  background: linear-gradient(to right, #313695, #4575b4, #74add1, #abd9e9, #e0f3f8, #ffffbf, #fee090, #fdae61, #f46d43, #d73027, #a50026);
+}
+</style>
+</head>
+<body>
+
+<!-- 工具栏 -->
+<div class="toolbar">
+  <span class="brand">PointCloud</span>
+  <label class="file-btn">
+    📂 选择数据文件
+    <input type="file" id="fileInput" accept=".json,.txt">
+  </label>
+  <span class="mode-badge" id="modeBadge">未加载</span>
+  <span class="info" id="pointCount"></span>
+</div>
+
+<!-- 进度条 -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="progress-text" id="progressText"></div>
+</div>
+
+<!-- 图表区域 -->
+<div class="chart-container" id="chartContainer">
+  <div class="chart" id="chart"></div>
+  <div class="empty-state" id="emptyState">
+    <div class="icon">📊</div>
+    <p>点击上方按钮加载数据文件</p>
+    <p style="font-size:12px;color:#444;margin-top:4px;">支持 3D 点云 / 2D 多边形</p>
+  </div>
+  <div class="info-panel" id="infoPanel">
+    <div class="title">选中点坐标</div>
+    <div class="coord" id="coordDisplay"></div>
+  </div>
+  <div class="legend-hint" id="legendHint" style="display:none;">
+    <span>Z浅</span>
+    <div class="legend-gradient"></div>
+    <span>Z深</span>
+  </div>
+</div>
+
+<script>
+// ─── 页面交互逻辑（仅 UI 粘合层）───────────────────────────
+(function() {
+  var container = document.getElementById('chart');
+  var fileInput = document.getElementById('fileInput');
+  var modeBadge = document.getElementById('modeBadge');
+  var pointCount = document.getElementById('pointCount');
+  var progressWrap = document.getElementById('progressWrap');
+  var progressBar = document.getElementById('progressBar');
+  var progressText = document.getElementById('progressText');
+  var infoPanel = document.getElementById('infoPanel');
+  var coordDisplay = document.getElementById('coordDisplay');
+  var legendHint = document.getElementById('legendHint');
+  var emptyState = document.getElementById('emptyState');
+
+  // 核心：仅此一行创建渲染器
+  var renderer = new PointRenderer(container);
+
+  fileInput.addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onloadstart = function() {
+      progressWrap.classList.add('visible');
+      progressBar.style.width = '0%';
+      progressText.textContent = '读取中...';
+      emptyState.style.display = 'none';
+    };
+
+    reader.onprogress = function(ev) {
+      if (ev.lengthComputable) {
+        var pct = Math.round((ev.loaded / ev.total) * 100);
+        progressBar.style.width = pct + '%';
+        progressText.textContent = '读取文件 ' + pct + '%';
+      }
+    };
+
+    reader.onload = function(ev) {
+      var text = ev.target.result;
+      progressText.textContent = '解析数据...';
+
+      setTimeout(function() {
+        try {
+          // 核心：仅此一行完成解析+渲染
+          var result = renderer.parseAndRender(text, function(pct) {
+            progressBar.style.width = pct + '%';
+            progressText.textContent = '解析中 ' + pct + '%';
+          });
+
+          var stats = renderer.getStats();
+          if (result.mode === '3d') {
+            modeBadge.textContent = '3D 模式';
+            modeBadge.className = 'mode-badge active';
+            pointCount.textContent = '点数量: ' + stats.pointCount.toLocaleString();
+            legendHint.style.display = 'flex';
+          } else {
+            modeBadge.textContent = '2D 模式';
+            modeBadge.className = 'mode-badge active';
+            pointCount.textContent = '多边形: ' + stats.polygonCount +
+                                    ' | 顶点: ' + stats.vertexCount.toLocaleString();
+            legendHint.style.display = 'none';
+          }
+
+          // 核心：注册点击回调
+          renderer.onClick(function(coord) {
+            infoPanel.classList.add('visible');
+            var html = 'X: <span>' + coord.x.toFixed(4) + '</span>&nbsp;&nbsp;' +
+                       'Y: <span>' + coord.y.toFixed(4) + '</span>';
+            if (coord.z != null) {
+              html += '&nbsp;&nbsp;Z: <span>' + coord.z.toFixed(4) + '</span>';
+            }
+            coordDisplay.innerHTML = html;
+          });
+
+          window.addEventListener('resize', function() { renderer.resize(); });
+
+          setTimeout(function() { progressWrap.classList.remove('visible'); }, 600);
+        } catch (err) {
+          alert('解析失败: ' + err.message);
+          progressWrap.classList.remove('visible');
+          emptyState.style.display = '';
+        }
+      }, 30);
+    };
+
+    reader.onerror = function() {
+      alert('文件读取失败');
+      progressWrap.classList.remove('visible');
+    };
+
+    reader.readAsText(file);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>生成大规模测试数据</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 500px; margin: 60px auto; padding: 20px; background: #1a1a2e; color: #e0e0e0; }
+  h2 { color: #e94560; }
+  label { display: block; margin: 12px 0 4px; font-size: 14px; color: #aaa; }
+  input, select { width: 100%; padding: 8px 12px; border: 1px solid #2a2a4a; border-radius: 4px; background: #16213e; color: #fff; font-size: 14px; }
+  button { margin-top: 16px; padding: 10px 24px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+  button:hover { opacity: .85; }
+  .status { margin-top: 16px; font-size: 13px; color: #74add1; }
+  .note { margin-top: 20px; padding: 12px; background: #16213e; border-radius: 4px; font-size: 12px; color: #888; }
+</style>
+</head>
+<body>
+<h2>生成 3D 点云测试数据</h2>
+<p style="color:#888;font-size:13px;">用于测试 50 万级别点的渲染性能</p>
+
+<label>点数量</label>
+<input type="number" id="count" value="500000" min="1000" max="2000000" step="10000">
+
+<label>分布模式</label>
+<select id="pattern">
+  <option value="sphere">球体分布 (Sphere)</option>
+  <option value="grid">网格分布 (Grid)</option>
+  <option value="random">随机分布 (Random)</option>
+  <option value="wave">波浪分布 (Wave)</option>
+</select>
+
+<button onclick="generate()">生成并下载</button>
+<div class="status" id="status"></div>
+
+<div class="note">
+  <b>文件格式说明：</b><br>
+  第1行: <code>3D</code> 或 <code>2D</code><br>
+  3D 模式后续行: <code>x y z</code> (空格分隔)<br>
+  2D 模式后续行: <code>x,y,z,x1,y1,z1,...</code> (逗号分隔的多边形顶点)
+</div>
+
+<script>
+function generate() {
+  var count = parseInt(document.getElementById('count').value);
+  var pattern = document.getElementById('pattern').value;
+  var status = document.getElementById('status');
+
+  status.textContent = '生成中...';
+  var lines = ['3D'];
+
+  // 分批生成避免阻塞
+  var batchSize = 50000;
+  var generated = 0;
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  function nextBatch() {
+    var end = Math.min(generated + batchSize, count);
+    for (var i = generated; i < end; i++) {
+      var x, y, z;
+      switch (pattern) {
+        case 'sphere':
+          var theta = rand(0, Math.PI * 2);
+          var phi = rand(0, Math.PI * 2);
+          var r = rand(1, 50);
+          x = r * Math.sin(theta) * Math.cos(phi);
+          y = r * Math.sin(theta) * Math.sin(phi);
+          z = r * Math.cos(theta);
+          break;
+        case 'grid':
+          var side = Math.ceil(Math.cbrt(count));
+          x = (i % side) * 100 / side;
+          y = (Math.floor(i / side) % side) * 100 / side;
+          z = Math.floor(i / (side * side)) * 100 / side;
+          break;
+        case 'wave':
+          x = rand(-50, 50);
+          y = rand(-50, 50);
+          z = Math.sin(x * 0.5) * Math.cos(y * 0.5) * 20 + rand(-2, 2) + 20;
+          break;
+        default: // random
+          x = rand(-50, 50);
+          y = rand(-50, 50);
+          z = rand(0, 50);
+      }
+      lines.push(x.toFixed(4) + ' ' + y.toFixed(4) + ' ' + z.toFixed(4));
+    }
+    generated = end;
+    status.textContent = '已生成 ' + generated.toLocaleString() + ' / ' + count.toLocaleString() + ' 个点...';
+
+    if (generated < count) {
+      setTimeout(nextBatch, 10);
+    } else {
+      var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'large-3d-' + count + '.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+      status.textContent = '下载完成: large-3d-' + count + '.txt (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)';
+    }
+  }
+
+  setTimeout(nextBatch, 50);
+}
+</script>
+</body>
+</html>
