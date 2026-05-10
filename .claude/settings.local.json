@@ -8,7 +8,16 @@
       "Bash(kill %1)",
       "Bash(curl -s http://localhost:5174)",
       "Bash(curl -s http://localhost:5174/sample-3d.txt)",
-      "Bash(pkill -f \"vite\")"
+      "Bash(pkill -f \"vite\")",
+      "Bash(node -e ' *)",
+      "Bash(node server.js)",
+      "Bash(curl -s http://localhost:3001/api/data/status)",
+      "Bash(curl -s -F \"file=@../sample-3d.txt\" http://localhost:3001/api/upload)",
+      "Bash(curl -s http://localhost:3001/api/data)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -s http://localhost:3001/api/logs)"
     ]
   }
 }

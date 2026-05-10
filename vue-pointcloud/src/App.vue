@@ -30,12 +30,12 @@
       <PointCloud
         ref="pointCloudRef"
         :options="chartOptions"
-        :data-text="dataText"
+        :server-data="serverData"
         @progress="onProgress"
         @click-point="onClickPoint"
         @error="onError"
       />
-      <div v-if="!dataText" class="empty-state">
+      <div v-if="!serverData" class="empty-state">
         <div class="icon">📊</div>
         <p>点击上方按钮加载数据文件</p>
         <p class="sub">支持 3D 点云 (50万+点) / 2D 多边形</p>
@@ -55,12 +55,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import PointCloud from './components/PointCloud.vue';
+
+const API_BASE = 'http://localhost:3001';
 
 // ── 状态 ──────────────────────────────────────────────
 const pointCloudRef = ref(null);
-const dataText = ref('');
+const serverData = ref(null);
 const mode = ref('');
 const stats = ref(null);
 const selected = ref(null);
@@ -68,6 +70,10 @@ const progress = ref(0);
 const progressing = ref(false);
 const progressText = ref('');
 const error = ref('');
+
+// 轮询相关
+let pollTimer = null;
+let knownVersion = 0;
 
 const chartOptions = {
   backgroundColor: '#1a1a2e',
@@ -86,22 +92,78 @@ const statsText = computed(() => {
   return `多边形: ${stats.value.polygonCount} | 顶点: ${stats.value.vertexCount.toLocaleString()}`;
 });
 
+// ── 轮询监听 ──────────────────────────────────────────
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/data/status`);
+      const status = await res.json();
+      if (status.version > knownVersion && status.hasData) {
+        knownVersion = status.version;
+        await downloadData();
+      }
+    } catch {
+      // 后端未就绪时静默忽略
+    }
+  }, 1000);
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+async function downloadData() {
+  try {
+    const res = await fetch(`${API_BASE}/api/data`);
+    const result = await res.json();
+    serverData.value = { mode: result.mode, data: result.data };
+  } catch (e) {
+    alert('下载数据失败: ' + e.message);
+    progressing.value = false;
+  }
+}
+
+onBeforeUnmount(() => stopPolling());
+
 // ── 事件处理 ──────────────────────────────────────────
-function handleFile(e) {
+async function handleFile(e) {
   const file = e.target.files[0];
   if (!file) return;
-  progressing.value = true;
-  progressText.value = '读取文件...';
 
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    dataText.value = ev.target.result;
-  };
-  reader.onerror = () => {
-    error.value = '文件读取失败';
+  progressing.value = true;
+  progressText.value = '上传文件到后端...';
+  progress.value = 30;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_BASE}/api/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (!result.success) {
+      throw new Error(result.error || '上传失败');
+    }
+
+    progress.value = 100;
+    progressText.value = '后端处理完成，等待数据...';
+    knownVersion = result.version;
+
+    // 下载数据并渲染
+    await downloadData();
+    setTimeout(() => { progressing.value = false; }, 400);
+    startPolling();
+  } catch (err) {
+    alert('上传失败: ' + err.message);
     progressing.value = false;
-  };
-  reader.readAsText(file);
+  }
 }
 
 function onProgress(pct) {
@@ -125,9 +187,34 @@ async function loadDemo(type) {
   const url = type === '3d' ? '/sample-3d.txt' : '/sample-2d.txt';
   progressing.value = true;
   progressText.value = '加载示例...';
+  progress.value = 20;
+
   try {
-    const res = await fetch(url);
-    dataText.value = await res.text();
+    // 下载示例文件，然后上传到后端
+    const txtRes = await fetch(`${API_BASE}${url}`);
+    const text = await txtRes.text();
+    const blob = new Blob([text], { type: 'text/plain' });
+    const formData = new FormData();
+    formData.append('file', blob, `sample-${type}.txt`);
+
+    progress.value = 50;
+    progressText.value = '上传到后端...';
+
+    const uploadRes = await fetch(`${API_BASE}/api/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await uploadRes.json();
+
+    if (!result.success) {
+      throw new Error(result.error || '上传失败');
+    }
+
+    progress.value = 100;
+    knownVersion = result.version;
+    await downloadData();
+    setTimeout(() => { progressing.value = false; }, 400);
+    startPolling();
   } catch (e) {
     alert('加载示例失败: ' + e.message);
     progressing.value = false;
