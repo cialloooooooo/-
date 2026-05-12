@@ -124,17 +124,35 @@ import 'echarts-gl';
         if (isNaN(x) || isNaN(y) || isNaN(z)) continue;
         result.push([x, y, z]);
       } else {
+        // 新 2D 格式: shape,param1,param2,param3,param4
         var parts2 = raw.split(',');
-        if (parts2.length < 3) continue;
-        var vertices = [];
-        for (var j = 0; j + 2 < parts2.length; j += 3) {
-          var vx = parseFloat(parts2[j]);
-          var vy = parseFloat(parts2[j + 1]);
-          var vz = parseFloat(parts2[j + 2]);
-          if (isNaN(vx) || isNaN(vy) || isNaN(vz)) continue;
-          vertices.push([vx, vy, vz]);
+        if (parts2.length < 5) continue;
+        var shape = parts2[0].trim().toLowerCase();
+        var p1 = parseFloat(parts2[1]);
+        var p2 = parseFloat(parts2[2]);
+        var p3 = parseFloat(parts2[3]);
+        var p4 = parseFloat(parts2[4]);
+
+        if (shape === 'ball' || shape === 'circle') {
+          if (isNaN(p1) || isNaN(p2) || isNaN(p3) || isNaN(p4)) continue;
+          var cx = p1, cy = p2, cz = p3, r = p4;
+          var vertices = [];
+          var segments = 64;
+          for (var k = 0; k < segments; k++) {
+            var angle = (2 * Math.PI * k) / segments;
+            vertices.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle), cz]);
+          }
+          result.push({ type: shape, vertices: vertices });
+        } else if (shape === 'rectangle') {
+          if (isNaN(p1) || isNaN(p2) || isNaN(p3) || isNaN(p4)) continue;
+          var rx = p1, ry = p2, rw = p3, rh = p4;
+          result.push({ type: shape, vertices: [
+            [rx, ry, 0],
+            [rx + rw, ry, 0],
+            [rx + rw, ry + rh, 0],
+            [rx, ry + rh, 0]
+          ]});
         }
-        if (vertices.length > 0) result.push(vertices);
       }
 
       if (onProgress && i % batchSize === 0) {
@@ -229,15 +247,20 @@ import 'echarts-gl';
     };
   }
 
-  /** @param {Array<Array<[number,number,number]>>} data */
+  /** @param {Array<{type: string, vertices: Array<[number,number,number]>}>} data */
   function build2DOption(data, config) {
     var cfg = extend(DEFAULTS, config);
     var series = [];
     var colors = ['#e94560','#0f3460','#74add1','#fdae61','#4575b4',
                   '#d73027','#abd9e9','#fee090','#313695','#f46d43'];
 
-    data.forEach(function(vertices, idx) {
+    data.forEach(function(item, idx) {
+      var vertices = item.vertices;
+      var shapeType = item.type;
       var color = colors[idx % colors.length];
+
+      // 形状的中文名
+      var shapeName = shapeType === 'ball' ? '球' : shapeType === 'circle' ? '圆' : shapeType === 'rectangle' ? '矩形' : shapeType;
 
       // 闭合多边形线段
       var lineData = vertices.map(function(v) { return [v[0], v[1]]; });
@@ -247,7 +270,7 @@ import 'echarts-gl';
 
       series.push({
         type: 'line',
-        name: '多边形 ' + (idx + 1),
+        name: shapeName + ' ' + (idx + 1),
         data: lineData,
         lineStyle: { color: color, width: cfg.polygon.lineWidth },
         symbol: 'none',
@@ -257,7 +280,7 @@ import 'echarts-gl';
 
       series.push({
         type: 'scatter',
-        name: '顶点组 ' + (idx + 1),
+        name: shapeName + ' ' + (idx + 1) + ' 顶点',
         data: vertices.map(function(v) { return [v[0], v[1]]; }),
         symbolSize: cfg.polygon.symbolSize,
         itemStyle: { color: color, borderColor: '#fff', borderWidth: 1 },
@@ -274,9 +297,9 @@ import 'echarts-gl';
           var px = p.value[0], py = p.value[1];
           var zInfo = '';
           for (var i = 0; i < data.length && !zInfo; i++) {
-            for (var j = 0; j < data[i].length; j++) {
-              if (Math.abs(data[i][j][0] - px) < 1e-6 && Math.abs(data[i][j][1] - py) < 1e-6) {
-                zInfo = '<br/>Z: <b>' + data[i][j][2].toFixed(4) + '</b>';
+            for (var j = 0; j < data[i].vertices.length; j++) {
+              if (Math.abs(data[i].vertices[j][0] - px) < 1e-6 && Math.abs(data[i].vertices[j][1] - py) < 1e-6) {
+                zInfo = '<br/>Z: <b>' + data[i].vertices[j][2].toFixed(4) + '</b>';
                 break;
               }
             }
@@ -357,7 +380,7 @@ import 'echarts-gl';
     /**
      * 直接设置结构化数据（跳过文件解析）
      * @param {'3d'|'2d'} mode
-     * @param {Array} data - 3D: Array<[x,y,z]>, 2D: Array<Array<[x,y,z]>>
+     * @param {Array} data - 3D: Array<[x,y,z]>, 2D: Array<{type: string, vertices: Array<[x,y,z]>}>
      */
     setData: function(mode, data) {
       this.mode = mode;
@@ -477,7 +500,7 @@ import 'echarts-gl';
         return { mode: '3D 散点', pointCount: this.data.length };
       } else {
         var totalVertices = 0;
-        this.data.forEach(function(p) { totalVertices += p.length; });
+        this.data.forEach(function(p) { totalVertices += p.vertices.length; });
         return { mode: '2D 多边形', polygonCount: this.data.length, vertexCount: totalVertices };
       }
     },

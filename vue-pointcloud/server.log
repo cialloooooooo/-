@@ -941,3 +941,635 @@
 [05:31:04] ← GET /api/data/status [304] 1ms
 [05:31:05] → GET /api/data/status
 [05:31:05] ← GET /api/data/status [304] 0ms
+[05:31:06] → GET /api/data/status
+[05:31:06] ← GET /api/data/status [304] 0ms
+[05:31:07] → GET /api/data/status
+[05:31:07] ← GET /api/data/status [304] 0ms
+[05:31:08] → GET /api/data/status
+[05:31:08] ← GET /api/data/status [304] 0ms
+[05:31:09] → GET /api/data/status
+[05:31:09] ← GET /api/data/status [304] 0ms
+[05:31:10] → GET /api/data/status
+[05:31:10] ← GET /api/data/status [304] 1ms
+[05:31:11] → GET /api/data/status
+[05:31:11] ← GET /api/data/status [304] 1ms
+[05:31:12] → GET /api/data/status
+[05:31:12] ← GET /api/data/status [304] 1ms
+[05:31:13] → GET /api/data/status
+[05:31:13] ← GET /api/data/status [304] 1ms
+[05:31:14] → GET /api/data/status
+[05:31:14] ← GET /api/data/status [304] 1ms
+[05:31:15] → GET /api/data/status
+[05:31:15] ← GET /api/data/status [304] 1ms
+[05:31:16] → GET /api/data/status
+[05:31:16] ← GET /api/data/status [304] 0ms
+[05:31:17] → GET /api/data/status
+[05:31:17] ← GET /api/data/status [304] 0ms
+[05:31:18] → GET /api/data/status
+[05:31:18] ← GET /api/data/status [304] 0ms
+[05:31:19] → GET /api/data/status
+[05:31:19] ← GET /api/data/status [304] 0ms
+[05:31:20] → GET /api/data/status
+[05:31:20] ← GET /api/data/status [304] 0ms
+[05:31:21] → GET /api/data/status
+[05:31:21] ← GET /api/data/status [304] 1ms
+[05:31:22] → GET /api/data/status
+[05:31:22] ← GET /api/data/status [304] 1ms
+[05:31:23] → GET /api/data/status
+[05:31:23] ← GET /api/data/status [304] 0ms
+[05:31:24] → GET /api/data/status
+[05:31:24] ← GET /api/data/status [304] 1ms
+[05:31:25] → GET /api/data/status
+[05:31:25] ← GET /api/data/status [304] 0ms
+[05:31:26] → GET /api/data/status
+[05:31:26] ← GET /api/data/status [304] 0ms
+[05:31:27] → GET /api/data/status
+[05:31:27] ← GET /api/data/status [304] 0ms
+[05:31:28] → GET /api/data/status
+[05:31:28] ← GET /api/data/status [304] 0ms
+[05:31:29] → GET /api/data/status
+[05:31:29] ← GET /api/data/status [304] 0ms
+[05:31:30] → GET /api/data/status
+[05:31:30] ← GET /api/data/status [304] 1ms
+[05:31:31] → GET /api/data/status
+[05:31:31] ← GET /api/data/status [304] 1ms
+[05:31:32] → GET /api/data/status
+[05:31:32] ← GET /api/data/status [304] 1ms
+[05:31:33] → GET /api/data/status
+[05:31:33] ← GET /api/data/status [304] 0ms
+[19:19:39] Backend server running at http://localhost:3001
+[19:19:39] 查看日志: http://localhost:3001/api/logs
+[19:19:54] → GET /api/logs
+[19:19:54] ← GET /api/logs [200] 4ms
+[19:19:54] → GET /favicon.ico
+[19:19:54] ← GET /favicon.ico [404] 1ms
+[19:19:55] ← GET /api/logs [200] 0ms
+[19:19:55] → GET /api/logs
+[19:20:02] → POST /api/upload
+[19:20:02] [upload] 收到文件: test-10k.txt
+[19:20:02] [upload] 文件大小: 381.91 KB
+[19:20:02] [upload] 文件前200字符: 2D\nball,49.0149,-67.3122,52.6265,5.6992\ncircle,16.9903,94.3210,-14.3506,10.4973\nrectangle,-19.7524,-88.6383,0.5885,2.1025\ncircle,-69.5400,-88.9279,-32.7700,3.8919\nball,1.9603,71.3505,-97.4893,10.1591\n
+[19:20:02] [upload] 开始解析...
+[19:20:02] [parse] 进度: 0%
+[19:20:02] [parse] 进度: 100%
+[19:20:02] [upload] 解析完成:
+[19:20:02]   版本号: 1
+[19:20:02]   模式: 2D 多边形
+[19:20:02]   第一个图形类型: ball 顶点数: 64
+[19:20:02]   总顶点数: 445420
+[19:20:02] ← POST /api/upload [200] 48ms
+[19:20:02]   多边形数: 10000
+[19:20:02] → GET /api/data
+[19:20:02] [data] 返回数据 version=1 大小=20304.41KB
+[19:20:02] ← GET /api/data [200] 164ms
+[19:20:14] → GET /api/data/status
+[19:20:14] ← GET /api/data/status [200] 3ms
+[19:20:14] → GET /api/data/status
+[19:20:14] ← GET /api/data/status [304] 1ms
+[19:20:16] → GET /api/data/status
+[19:20:16] ← GET /api/data/status [304] 1ms
+[19:20:17] → GET /api/data/status
+[19:20:17] ← GET /api/data/status [304] 1ms
+[19:20:18] → GET /api/data/status
+[19:20:18] ← GET /api/data/status [304] 2ms
+[19:20:19] → GET /api/data/status
+[19:20:19] ← GET /api/data/status [304] 1ms
+[19:20:19] → GET /api/data/status
+[19:20:19] ← GET /api/data/status [304] 1ms
+[19:20:21] → GET /api/data/status
+[19:20:21] ← GET /api/data/status [304] 1ms
+[19:20:50] → GET /api/data/status
+[19:20:50] ← GET /api/data/status [304] 1ms
+[19:21:11] → GET /api/data/status
+[19:21:11] ← GET /api/data/status [304] 1ms
+[19:21:11] → GET /api/data/status
+[19:21:11] ← GET /api/data/status [304] 1ms
+[19:21:12] → GET /api/data/status
+[19:21:12] ← GET /api/data/status [304] 1ms
+[19:21:13] → GET /api/data/status
+[19:21:13] ← GET /api/data/status [304] 1ms
+[19:21:14] → GET /api/data/status
+[19:21:14] ← GET /api/data/status [304] 1ms
+[19:21:15] → GET /api/data/status
+[19:21:15] ← GET /api/data/status [304] 1ms
+[19:21:16] → GET /api/data/status
+[19:21:16] ← GET /api/data/status [304] 1ms
+[19:21:17] → GET /api/data/status
+[19:21:17] ← GET /api/data/status [304] 1ms
+[19:21:18] → GET /api/data/status
+[19:21:18] ← GET /api/data/status [304] 1ms
+[19:21:19] → GET /api/data/status
+[19:21:19] ← GET /api/data/status [304] 1ms
+[19:21:20] → GET /api/data/status
+[19:21:20] ← GET /api/data/status [304] 1ms
+[19:21:21] → GET /api/data/status
+[19:21:21] ← GET /api/data/status [304] 1ms
+[19:21:22] → GET /api/data/status
+[19:21:22] ← GET /api/data/status [304] 1ms
+[19:21:23] → GET /api/data/status
+[19:21:23] ← GET /api/data/status [304] 1ms
+[19:21:24] → GET /api/data/status
+[19:21:24] ← GET /api/data/status [304] 1ms
+[19:21:25] → GET /api/data/status
+[19:21:25] ← GET /api/data/status [304] 1ms
+[19:21:26] ← GET /api/data/status [304] 1ms
+[19:21:26] → GET /api/data/status
+[19:21:27] → GET /api/data/status
+[19:21:27] ← GET /api/data/status [304] 1ms
+[19:21:28] → GET /api/data/status
+[19:21:28] ← GET /api/data/status [304] 1ms
+[19:21:29] → GET /api/data/status
+[19:21:29] ← GET /api/data/status [304] 1ms
+[19:21:30] → GET /api/data/status
+[19:21:30] ← GET /api/data/status [304] 1ms
+[19:21:31] → GET /api/data/status
+[19:21:31] ← GET /api/data/status [304] 1ms
+[19:21:32] → GET /api/data/status
+[19:21:32] ← GET /api/data/status [304] 1ms
+[19:21:33] → GET /api/data/status
+[19:21:33] ← GET /api/data/status [304] 1ms
+[19:21:34] → GET /api/data/status
+[19:21:34] ← GET /api/data/status [304] 1ms
+[19:21:35] → GET /api/data/status
+[19:21:35] ← GET /api/data/status [304] 1ms
+[19:21:36] ← GET /api/data/status [304] 2ms
+[19:21:36] → GET /api/data/status
+[19:21:37] → GET /api/data/status
+[19:21:37] ← GET /api/data/status [304] 1ms
+[19:21:38] → GET /api/data/status
+[19:21:38] ← GET /api/data/status [304] 1ms
+[19:21:39] → GET /api/data/status
+[19:21:39] ← GET /api/data/status [304] 1ms
+[19:21:40] → GET /api/data/status
+[19:21:40] ← GET /api/data/status [304] 1ms
+[19:21:41] → GET /api/data/status
+[19:21:41] ← GET /api/data/status [304] 1ms
+[19:21:42] → GET /api/data/status
+[19:21:42] ← GET /api/data/status [304] 1ms
+[19:21:43] → GET /api/data/status
+[19:21:43] ← GET /api/data/status [304] 1ms
+[19:21:44] → GET /api/data/status
+[19:21:44] ← GET /api/data/status [304] 1ms
+[19:21:45] → GET /api/data/status
+[19:21:45] ← GET /api/data/status [304] 1ms
+[19:21:46] → GET /api/data/status
+[19:21:46] ← GET /api/data/status [304] 1ms
+[19:21:47] → GET /api/data/status
+[19:21:47] ← GET /api/data/status [304] 1ms
+[19:21:48] → GET /api/data/status
+[19:21:48] ← GET /api/data/status [304] 1ms
+[19:21:49] → GET /api/data/status
+[19:21:49] ← GET /api/data/status [304] 1ms
+[19:21:50] → GET /api/data/status
+[19:21:50] ← GET /api/data/status [304] 1ms
+[19:21:51] → GET /api/data/status
+[19:21:51] ← GET /api/data/status [304] 2ms
+[19:21:52] → GET /api/data/status
+[19:21:52] ← GET /api/data/status [304] 1ms
+[19:21:53] → GET /api/data/status
+[19:21:53] ← GET /api/data/status [304] 1ms
+[19:21:54] → GET /api/data/status
+[19:21:54] ← GET /api/data/status [304] 1ms
+[19:21:55] → GET /api/data/status
+[19:21:55] ← GET /api/data/status [304] 1ms
+[19:21:56] → GET /api/data/status
+[19:21:56] ← GET /api/data/status [304] 1ms
+[19:21:57] → GET /api/data/status
+[19:21:57] ← GET /api/data/status [304] 1ms
+[19:21:58] → GET /api/data/status
+[19:21:58] ← GET /api/data/status [304] 1ms
+[19:21:59] → GET /api/data/status
+[19:21:59] ← GET /api/data/status [304] 1ms
+[19:22:00] → GET /api/data/status
+[19:22:00] ← GET /api/data/status [304] 1ms
+[19:22:01] → GET /api/data/status
+[19:22:01] ← GET /api/data/status [304] 1ms
+[19:22:02] → GET /api/data/status
+[19:22:02] ← GET /api/data/status [304] 1ms
+[19:22:03] → GET /api/data/status
+[19:22:03] ← GET /api/data/status [304] 1ms
+[19:22:04] → GET /api/data/status
+[19:22:04] ← GET /api/data/status [304] 1ms
+[19:22:05] → GET /api/data/status
+[19:22:05] ← GET /api/data/status [304] 1ms
+[19:22:06] → GET /api/data/status
+[19:22:06] ← GET /api/data/status [304] 1ms
+[19:22:07] → GET /api/data/status
+[19:22:07] ← GET /api/data/status [304] 1ms
+[19:22:08] → GET /api/data/status
+[19:22:08] ← GET /api/data/status [304] 1ms
+[19:22:09] → GET /api/data/status
+[19:22:09] ← GET /api/data/status [304] 1ms
+[19:22:10] ← GET /api/data/status [304] 1ms
+[19:22:10] → GET /api/data/status
+[19:22:11] → GET /api/data/status
+[19:22:11] ← GET /api/data/status [304] 1ms
+[19:22:12] → GET /api/data/status
+[19:22:12] ← GET /api/data/status [304] 1ms
+[19:22:13] → GET /api/data/status
+[19:22:13] ← GET /api/data/status [304] 1ms
+[19:22:14] → GET /api/data/status
+[19:22:14] ← GET /api/data/status [304] 1ms
+[19:22:15] → GET /api/data/status
+[19:22:15] ← GET /api/data/status [304] 2ms
+[19:22:16] → GET /api/data/status
+[19:22:16] ← GET /api/data/status [304] 1ms
+[19:22:17] → GET /api/data/status
+[19:22:17] ← GET /api/data/status [304] 1ms
+[19:22:18] → GET /api/data/status
+[19:22:18] ← GET /api/data/status [304] 1ms
+[19:22:19] → GET /api/data/status
+[19:22:19] ← GET /api/data/status [304] 1ms
+[19:22:20] → GET /api/data/status
+[19:22:20] ← GET /api/data/status [304] 1ms
+[19:22:21] → GET /api/data/status
+[19:22:21] ← GET /api/data/status [304] 0ms
+[19:22:22] → GET /api/data/status
+[19:22:22] ← GET /api/data/status [304] 2ms
+[19:22:23] → GET /api/data/status
+[19:22:23] ← GET /api/data/status [304] 1ms
+[19:22:24] → GET /api/data/status
+[19:22:24] ← GET /api/data/status [304] 1ms
+[19:22:25] → GET /api/data/status
+[19:22:25] ← GET /api/data/status [304] 1ms
+[19:22:26] → GET /api/data/status
+[19:22:26] ← GET /api/data/status [304] 1ms
+[19:22:27] → GET /api/data/status
+[19:22:27] ← GET /api/data/status [304] 1ms
+[19:22:28] → GET /api/data/status
+[19:22:28] ← GET /api/data/status [304] 1ms
+[19:22:29] → GET /api/data/status
+[19:22:29] ← GET /api/data/status [304] 1ms
+[19:22:30] → GET /api/data/status
+[19:22:30] ← GET /api/data/status [304] 1ms
+[19:22:31] → GET /api/data/status
+[19:22:31] ← GET /api/data/status [304] 1ms
+[19:22:32] → GET /api/data/status
+[19:22:32] ← GET /api/data/status [304] 1ms
+[19:22:33] → GET /api/data/status
+[19:22:33] ← GET /api/data/status [304] 1ms
+[19:22:34] → GET /api/data/status
+[19:22:34] ← GET /api/data/status [304] 1ms
+[19:22:35] → GET /api/data/status
+[19:22:35] ← GET /api/data/status [304] 1ms
+[19:22:36] → GET /api/data/status
+[19:22:36] ← GET /api/data/status [304] 1ms
+[19:22:37] → GET /api/data/status
+[19:22:37] ← GET /api/data/status [304] 1ms
+[19:22:38] → GET /api/data/status
+[19:22:38] ← GET /api/data/status [304] 1ms
+[19:22:39] → GET /api/data/status
+[19:22:39] ← GET /api/data/status [304] 1ms
+[19:22:40] → GET /api/data/status
+[19:22:40] ← GET /api/data/status [304] 0ms
+[19:22:41] → GET /api/data/status
+[19:22:41] ← GET /api/data/status [304] 1ms
+[19:22:42] ← GET /api/data/status [304] 1ms
+[19:22:42] → GET /api/data/status
+[19:22:43] → GET /api/data/status
+[19:22:43] ← GET /api/data/status [304] 1ms
+[19:22:44] → GET /api/data/status
+[19:22:44] ← GET /api/data/status [304] 1ms
+[19:22:45] → GET /api/data/status
+[19:22:45] ← GET /api/data/status [304] 1ms
+[19:22:46] → GET /api/data/status
+[19:22:46] ← GET /api/data/status [304] 1ms
+[19:22:47] → GET /api/data/status
+[19:22:47] ← GET /api/data/status [304] 1ms
+[19:22:48] → GET /api/data/status
+[19:22:48] ← GET /api/data/status [304] 1ms
+[19:22:49] → GET /api/data/status
+[19:22:49] ← GET /api/data/status [304] 1ms
+[19:22:50] → GET /api/data/status
+[19:22:50] ← GET /api/data/status [304] 1ms
+[19:22:51] → GET /api/data/status
+[19:22:51] ← GET /api/data/status [304] 1ms
+[19:22:52] → GET /api/data/status
+[19:22:52] ← GET /api/data/status [304] 1ms
+[19:22:53] → GET /api/data/status
+[19:22:53] ← GET /api/data/status [304] 1ms
+[19:22:54] → GET /api/data/status
+[19:22:54] ← GET /api/data/status [304] 1ms
+[19:22:55] → GET /api/data/status
+[19:22:55] ← GET /api/data/status [304] 1ms
+[19:22:56] → GET /api/data/status
+[19:22:56] ← GET /api/data/status [304] 1ms
+[19:22:57] → GET /api/data/status
+[19:22:57] ← GET /api/data/status [304] 1ms
+[19:22:58] → GET /api/data/status
+[19:22:58] ← GET /api/data/status [304] 1ms
+[19:22:59] → GET /api/data/status
+[19:22:59] ← GET /api/data/status [304] 1ms
+[19:23:00] → GET /api/data/status
+[19:23:00] ← GET /api/data/status [304] 1ms
+[19:23:01] → GET /api/data/status
+[19:23:01] ← GET /api/data/status [304] 1ms
+[19:23:02] → GET /api/data/status
+[19:23:02] ← GET /api/data/status [304] 1ms
+[19:23:03] → GET /api/data/status
+[19:23:03] ← GET /api/data/status [304] 1ms
+[19:23:04] ← GET /api/data/status [304] 1ms
+[19:23:04] → GET /api/data/status
+[19:23:05] → GET /api/data/status
+[19:23:05] ← GET /api/data/status [304] 1ms
+[19:23:06] → GET /api/data/status
+[19:23:06] ← GET /api/data/status [304] 2ms
+[19:23:07] → GET /api/data/status
+[19:23:07] ← GET /api/data/status [304] 1ms
+[19:23:08] → GET /api/data/status
+[19:23:08] ← GET /api/data/status [304] 1ms
+[19:23:09] → GET /api/data/status
+[19:23:09] ← GET /api/data/status [304] 1ms
+[19:23:10] → GET /api/data/status
+[19:23:10] ← GET /api/data/status [304] 1ms
+[19:23:11] → GET /api/data/status
+[19:23:11] ← GET /api/data/status [304] 1ms
+[19:23:12] → GET /api/data/status
+[19:23:12] ← GET /api/data/status [304] 1ms
+[19:23:13] → GET /api/data/status
+[19:23:13] ← GET /api/data/status [304] 1ms
+[19:23:14] → GET /api/data/status
+[19:23:14] ← GET /api/data/status [304] 1ms
+[19:23:15] → GET /api/data/status
+[19:23:15] ← GET /api/data/status [304] 1ms
+[19:23:16] → GET /api/data/status
+[19:23:16] ← GET /api/data/status [304] 1ms
+[19:23:17] → GET /api/data/status
+[19:23:17] ← GET /api/data/status [304] 1ms
+[19:23:18] → GET /api/data/status
+[19:23:18] ← GET /api/data/status [304] 1ms
+[19:23:19] ← GET /api/data/status [304] 1ms
+[19:23:19] → GET /api/data/status
+[19:23:20] → GET /api/data/status
+[19:23:20] ← GET /api/data/status [304] 1ms
+[19:23:21] ← GET /api/data/status [304] 1ms
+[19:23:21] → GET /api/data/status
+[19:23:22] → GET /api/data/status
+[19:23:22] ← GET /api/data/status [304] 2ms
+[19:23:23] → GET /api/data/status
+[19:23:23] ← GET /api/data/status [304] 1ms
+[19:23:24] → GET /api/data/status
+[19:23:24] ← GET /api/data/status [304] 1ms
+[19:23:25] → GET /api/data/status
+[19:23:25] ← GET /api/data/status [304] 1ms
+[19:23:26] → GET /api/data/status
+[19:23:26] ← GET /api/data/status [304] 1ms
+[19:23:27] → GET /api/data/status
+[19:23:27] ← GET /api/data/status [304] 1ms
+[19:23:28] → GET /api/data/status
+[19:23:28] ← GET /api/data/status [304] 1ms
+[19:23:29] → GET /api/data/status
+[19:23:29] ← GET /api/data/status [304] 1ms
+[19:23:30] → GET /api/data/status
+[19:23:30] ← GET /api/data/status [304] 1ms
+[19:23:31] → GET /api/data/status
+[19:23:31] ← GET /api/data/status [304] 1ms
+[19:23:32] → GET /api/data/status
+[19:23:32] ← GET /api/data/status [304] 1ms
+[19:23:33] → GET /api/data/status
+[19:23:33] ← GET /api/data/status [304] 1ms
+[19:23:34] → GET /api/data/status
+[19:23:34] ← GET /api/data/status [304] 1ms
+[19:23:35] → GET /api/data/status
+[19:23:35] ← GET /api/data/status [304] 1ms
+[19:23:36] → GET /api/data/status
+[19:23:36] ← GET /api/data/status [304] 1ms
+[19:23:37] → GET /api/data/status
+[19:23:37] ← GET /api/data/status [304] 1ms
+[19:23:38] → GET /api/data/status
+[19:23:38] ← GET /api/data/status [304] 1ms
+[19:23:39] → GET /api/data/status
+[19:23:39] ← GET /api/data/status [304] 1ms
+[19:23:40] → GET /api/data/status
+[19:23:40] ← GET /api/data/status [304] 1ms
+[19:23:41] → GET /api/data/status
+[19:23:41] ← GET /api/data/status [304] 1ms
+[19:23:42] → GET /api/data/status
+[19:23:42] ← GET /api/data/status [304] 1ms
+[19:23:43] → GET /api/data/status
+[19:23:43] ← GET /api/data/status [304] 1ms
+[19:23:44] → GET /api/data/status
+[19:23:44] ← GET /api/data/status [304] 1ms
+[19:23:45] → GET /api/data/status
+[19:23:45] ← GET /api/data/status [304] 1ms
+[19:23:46] → GET /api/data/status
+[19:23:46] ← GET /api/data/status [304] 1ms
+[19:23:47] → GET /api/data/status
+[19:23:47] ← GET /api/data/status [304] 1ms
+[19:23:48] → GET /api/data/status
+[19:23:48] ← GET /api/data/status [304] 1ms
+[19:23:49] → GET /api/data/status
+[19:23:49] ← GET /api/data/status [304] 1ms
+[19:23:50] → GET /api/data/status
+[19:23:50] ← GET /api/data/status [304] 1ms
+[19:23:51] → GET /api/data/status
+[19:23:51] ← GET /api/data/status [304] 1ms
+[19:23:52] → GET /api/data/status
+[19:23:52] ← GET /api/data/status [304] 1ms
+[19:23:53] → GET /api/data/status
+[19:23:53] ← GET /api/data/status [304] 1ms
+[19:23:54] → GET /api/data/status
+[19:23:54] ← GET /api/data/status [304] 1ms
+[19:23:55] → GET /api/data/status
+[19:23:55] ← GET /api/data/status [304] 1ms
+[19:23:56] → GET /api/data/status
+[19:23:56] ← GET /api/data/status [304] 1ms
+[19:23:57] → GET /api/data/status
+[19:23:57] ← GET /api/data/status [304] 1ms
+[19:23:58] → GET /api/data/status
+[19:23:58] ← GET /api/data/status [304] 1ms
+[19:23:59] → GET /api/data/status
+[19:23:59] ← GET /api/data/status [304] 1ms
+[19:24:00] → GET /api/data/status
+[19:24:00] ← GET /api/data/status [304] 1ms
+[19:24:01] → GET /api/data/status
+[19:24:01] ← GET /api/data/status [304] 1ms
+[19:24:02] → GET /api/data/status
+[19:24:02] ← GET /api/data/status [304] 1ms
+[19:24:03] → GET /api/data/status
+[19:24:03] ← GET /api/data/status [304] 1ms
+[19:24:04] → GET /api/data/status
+[19:24:04] ← GET /api/data/status [304] 1ms
+[19:24:05] → GET /api/data/status
+[19:24:05] ← GET /api/data/status [304] 1ms
+[19:24:06] → GET /api/data/status
+[19:24:06] ← GET /api/data/status [304] 1ms
+[19:24:07] → GET /api/data/status
+[19:24:07] ← GET /api/data/status [304] 1ms
+[19:24:08] → GET /api/data/status
+[19:24:08] ← GET /api/data/status [304] 1ms
+[19:24:09] → GET /api/data/status
+[19:24:09] ← GET /api/data/status [304] 1ms
+[19:24:10] → GET /api/data/status
+[19:24:10] ← GET /api/data/status [304] 1ms
+[19:24:11] → GET /api/data/status
+[19:24:11] ← GET /api/data/status [304] 1ms
+[19:24:12] → GET /api/data/status
+[19:24:12] ← GET /api/data/status [304] 1ms
+[19:24:13] → GET /api/data/status
+[19:24:13] ← GET /api/data/status [304] 1ms
+[19:24:14] ← GET /api/data/status [304] 1ms
+[19:24:14] → GET /api/data/status
+[19:24:15] → GET /api/data/status
+[19:24:15] ← GET /api/data/status [304] 1ms
+[19:24:16] → GET /api/data/status
+[19:24:16] ← GET /api/data/status [304] 1ms
+[19:24:17] → GET /api/data/status
+[19:24:17] ← GET /api/data/status [304] 1ms
+[19:24:18] → GET /api/data/status
+[19:24:18] ← GET /api/data/status [304] 1ms
+[19:24:19] → GET /api/data/status
+[19:24:19] ← GET /api/data/status [304] 1ms
+[19:24:20] → GET /api/data/status
+[19:24:20] ← GET /api/data/status [304] 1ms
+[19:24:21] → GET /api/data/status
+[19:24:21] ← GET /api/data/status [304] 1ms
+[19:24:22] → GET /api/data/status
+[19:24:22] ← GET /api/data/status [304] 1ms
+[19:24:23] → GET /api/data/status
+[19:24:23] ← GET /api/data/status [304] 1ms
+[19:24:24] → GET /api/data/status
+[19:24:24] ← GET /api/data/status [304] 1ms
+[19:24:25] → GET /api/data/status
+[19:24:25] ← GET /api/data/status [304] 1ms
+[19:24:26] → GET /api/data/status
+[19:24:26] ← GET /api/data/status [304] 1ms
+[19:24:27] → GET /api/data/status
+[19:24:27] ← GET /api/data/status [304] 1ms
+[19:24:28] → GET /api/data/status
+[19:24:28] ← GET /api/data/status [304] 1ms
+[19:24:29] → GET /api/data/status
+[19:24:29] ← GET /api/data/status [304] 1ms
+[19:24:30] → GET /api/data/status
+[19:24:30] ← GET /api/data/status [304] 1ms
+[19:24:31] → GET /api/data/status
+[19:24:31] ← GET /api/data/status [304] 1ms
+[19:24:32] → GET /api/data/status
+[19:24:32] ← GET /api/data/status [304] 1ms
+[19:24:33] → GET /api/data/status
+[19:24:33] ← GET /api/data/status [304] 1ms
+[19:24:34] → GET /api/data/status
+[19:24:34] ← GET /api/data/status [304] 1ms
+[19:24:35] → GET /api/data/status
+[19:24:35] ← GET /api/data/status [304] 1ms
+[19:24:36] → GET /api/data/status
+[19:24:36] ← GET /api/data/status [304] 1ms
+[19:24:37] → GET /api/data/status
+[19:24:37] ← GET /api/data/status [304] 1ms
+[19:24:45] → POST /api/upload
+[19:24:45] [upload] 收到文件: test-10k.txt
+[19:24:45] [upload] 文件前200字符: 2D\nrectangle,-792.0848,-793.0776,2.2499,5.0935\nrectangle,-774.9457,-791.2793,4.3909,4.7405\nrectangle,-760.4165,-790.9233,2.1803,4.7827\nball,-744.8429,-793.1602,-46.4928,4.0477\ncircle,-728.1481,-791.98
+[19:24:45] [upload] 文件大小: 399.41 KB
+[19:24:45] [upload] 开始解析...
+[19:24:45] [upload] 解析完成:
+[19:24:45] [parse] 进度: 100%
+[19:24:45]   模式: 2D 多边形
+[19:24:45] [parse] 进度: 0%
+[19:24:45]   多边形数: 10000
+[19:24:45]   版本号: 2
+[19:24:45]   第一个图形类型: rectangle 顶点数: 4
+[19:24:45] ← POST /api/upload [200] 38ms
+[19:24:45]   总顶点数: 442360
+[19:24:45] → GET /api/data
+[19:24:45] [data] 返回数据 version=2 大小=20164.80KB
+[19:24:45] ← GET /api/data [200] 163ms
+[19:24:58] → GET /api/data/status
+[19:24:58] ← GET /api/data/status [200] 1ms
+[19:24:59] → GET /api/data/status
+[19:24:59] ← GET /api/data/status [304] 2ms
+[19:25:00] → GET /api/data/status
+[19:25:00] ← GET /api/data/status [304] 1ms
+[19:25:01] → GET /api/data/status
+[19:25:01] ← GET /api/data/status [304] 1ms
+[19:25:02] → GET /api/data/status
+[19:25:02] ← GET /api/data/status [304] 1ms
+[19:25:03] → GET /api/data/status
+[19:25:03] ← GET /api/data/status [304] 1ms
+[19:25:04] → GET /api/data/status
+[19:25:04] ← GET /api/data/status [304] 1ms
+[19:25:05] → GET /api/data/status
+[19:25:05] ← GET /api/data/status [304] 1ms
+[19:25:06] → GET /api/data/status
+[19:25:06] ← GET /api/data/status [304] 1ms
+[19:25:07] → GET /api/data/status
+[19:25:07] ← GET /api/data/status [304] 1ms
+[19:25:08] → GET /api/data/status
+[19:25:08] ← GET /api/data/status [304] 2ms
+[19:25:09] → GET /api/data/status
+[19:25:09] ← GET /api/data/status [304] 1ms
+[19:25:11] → GET /api/data/status
+[19:25:11] ← GET /api/data/status [304] 1ms
+[19:25:12] → GET /api/data/status
+[19:25:12] ← GET /api/data/status [304] 1ms
+[19:25:13] → GET /api/data/status
+[19:25:13] ← GET /api/data/status [304] 1ms
+[19:25:14] → GET /api/data/status
+[19:25:14] ← GET /api/data/status [304] 1ms
+[19:25:15] → GET /api/data/status
+[19:25:15] ← GET /api/data/status [304] 1ms
+[19:25:16] → GET /api/data/status
+[19:25:16] ← GET /api/data/status [304] 1ms
+[19:25:17] → GET /api/data/status
+[19:25:17] ← GET /api/data/status [304] 1ms
+[19:25:18] → GET /api/data/status
+[19:25:18] ← GET /api/data/status [304] 1ms
+[19:25:19] → GET /api/data/status
+[19:25:19] ← GET /api/data/status [304] 1ms
+[19:25:20] → GET /api/data/status
+[19:25:20] ← GET /api/data/status [304] 1ms
+[19:25:21] → GET /api/data/status
+[19:25:21] ← GET /api/data/status [304] 1ms
+[19:25:22] → GET /api/data/status
+[19:25:22] ← GET /api/data/status [304] 1ms
+[19:25:23] → GET /api/data/status
+[19:25:23] ← GET /api/data/status [304] 1ms
+[19:25:24] → GET /api/data/status
+[19:25:24] ← GET /api/data/status [304] 1ms
+[19:25:25] → GET /api/data/status
+[19:25:25] ← GET /api/data/status [304] 2ms
+[19:25:26] ← GET /api/data/status [304] 2ms
+[19:25:26] → GET /api/data/status
+[19:25:27] → GET /api/data/status
+[19:25:27] ← GET /api/data/status [304] 2ms
+[19:25:28] → GET /api/data/status
+[19:25:28] ← GET /api/data/status [304] 1ms
+[19:25:29] → GET /api/data/status
+[19:25:29] ← GET /api/data/status [304] 1ms
+[19:25:30] → GET /api/data/status
+[19:25:30] ← GET /api/data/status [304] 1ms
+[19:25:31] → GET /api/data/status
+[19:25:31] ← GET /api/data/status [304] 1ms
+[19:25:32] → GET /api/data/status
+[19:25:32] ← GET /api/data/status [304] 1ms
+[19:25:33] → GET /api/data/status
+[19:25:33] ← GET /api/data/status [304] 1ms
+[19:25:34] → GET /api/data/status
+[19:25:34] ← GET /api/data/status [304] 1ms
+[19:25:35] → GET /api/data/status
+[19:25:35] ← GET /api/data/status [304] 2ms
+[19:25:36] → GET /api/data/status
+[19:25:36] ← GET /api/data/status [304] 1ms
+[19:25:38] → GET /api/data/status
+[19:25:38] ← GET /api/data/status [304] 1ms
+[19:25:38] → GET /api/data/status
+[19:25:38] ← GET /api/data/status [304] 1ms
+[19:25:39] → GET /api/data/status
+[19:25:39] ← GET /api/data/status [304] 1ms
+[19:25:40] → GET /api/data/status
+[19:25:40] ← GET /api/data/status [304] 1ms
+[19:25:43] → GET /api/data/status
+[19:25:43] ← GET /api/data/status [304] 1ms
+[19:25:44] → GET /api/data/status
+[19:25:44] ← GET /api/data/status [304] 1ms
+[19:25:44] → GET /api/data/status
+[19:25:44] ← GET /api/data/status [304] 1ms
+[19:25:45] → GET /api/data/status
+[19:25:45] ← GET /api/data/status [304] 1ms
+[19:26:04] → GET /api/data/status
+[19:26:04] ← GET /api/data/status [304] 2ms
+[19:26:04] → GET /api/data/status
+[19:26:04] ← GET /api/data/status [304] 1ms
+[19:26:05] → GET /api/data/status
+[19:26:05] ← GET /api/data/status [304] 1ms
+[19:26:06] → GET /api/data/status
+[19:26:06] ← GET /api/data/status [304] 2ms

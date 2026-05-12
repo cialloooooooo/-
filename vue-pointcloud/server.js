@@ -73,17 +73,35 @@ function parseFile(text, onProgress) {
       if (isNaN(x) || isNaN(y) || isNaN(z)) continue;
       result.push([x, y, z]);
     } else {
+      // 新 2D 格式: shape,param1,param2,param3,param4
       const parts = raw.split(',');
-      if (parts.length < 3) continue;
-      const vertices = [];
-      for (let j = 0; j + 2 < parts.length; j += 3) {
-        const vx = parseFloat(parts[j]);
-        const vy = parseFloat(parts[j + 1]);
-        const vz = parseFloat(parts[j + 2]);
-        if (isNaN(vx) || isNaN(vy) || isNaN(vz)) continue;
-        vertices.push([vx, vy, vz]);
+      if (parts.length < 5) continue;
+      const shape = parts[0].trim().toLowerCase();
+      const p1 = parseFloat(parts[1]);
+      const p2 = parseFloat(parts[2]);
+      const p3 = parseFloat(parts[3]);
+      const p4 = parseFloat(parts[4]);
+
+      if (shape === 'ball' || shape === 'circle') {
+        if (isNaN(p1) || isNaN(p2) || isNaN(p3) || isNaN(p4)) continue;
+        const cx = p1, cy = p2, cz = p3, r = p4;
+        const vertices = [];
+        const segments = 64;
+        for (let k = 0; k < segments; k++) {
+          const angle = (2 * Math.PI * k) / segments;
+          vertices.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle), cz]);
+        }
+        result.push({ type: shape, vertices });
+      } else if (shape === 'rectangle') {
+        if (isNaN(p1) || isNaN(p2) || isNaN(p3) || isNaN(p4)) continue;
+        const rx = p1, ry = p2, rw = p3, rh = p4;
+        result.push({ type: shape, vertices: [
+          [rx, ry, 0],
+          [rx + rw, ry, 0],
+          [rx + rw, ry + rh, 0],
+          [rx, ry + rh, 0]
+        ]});
       }
-      if (vertices.length > 0) result.push(vertices);
     }
 
     if (onProgress && i % batchSize === 0) {
@@ -131,7 +149,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     const stats =
       result.mode === '3d'
         ? { mode: '3D 散点', pointCount: result.data.length }
-        : { mode: '2D 多边形', polygonCount: result.data.length, vertexCount: result.data.reduce((s, p) => s + p.length, 0) };
+        : { mode: '2D 多边形', polygonCount: result.data.length, vertexCount: result.data.reduce((s, p) => s + p.vertices.length, 0) };
 
     log('[upload] 解析完成:');
     log('  模式: ' + stats.mode);
@@ -142,7 +160,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     } else {
       log('  多边形数: ' + stats.polygonCount);
       log('  总顶点数: ' + stats.vertexCount);
-      log('  第一个多边形顶点数: ' + (result.data[0]?.length || 0) + ' 前3个顶点: ' + JSON.stringify(result.data[0]?.slice(0, 3)));
+      log('  第一个图形类型: ' + (result.data[0]?.type || '') + ' 顶点数: ' + (result.data[0]?.vertices?.length || 0));
     }
 
     res.json({ success: true, version: dataVersion, stats });
@@ -160,7 +178,7 @@ app.get('/api/data/status', (req, res) => {
   const stats =
     currentData.mode === '3d'
       ? { mode: '3D 散点', pointCount: currentData.data.length }
-      : { mode: '2D 多边形', polygonCount: currentData.data.length, vertexCount: currentData.data.reduce((s, p) => s + p.length, 0) };
+      : { mode: '2D 多边形', polygonCount: currentData.data.length, vertexCount: currentData.data.reduce((s, p) => s + p.vertices.length, 0) };
   res.json({ version: dataVersion, hasData: true, stats });
 });
 
