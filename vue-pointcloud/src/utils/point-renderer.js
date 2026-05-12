@@ -277,15 +277,6 @@ import 'echarts-gl';
         silent: true,
         z: 1,
       });
-
-      series.push({
-        type: 'scatter',
-        name: shapeName + ' ' + (idx + 1) + ' 顶点',
-        data: vertices.map(function(v) { return [v[0], v[1]]; }),
-        symbolSize: cfg.polygon.symbolSize,
-        itemStyle: { color: color, borderColor: '#fff', borderWidth: 1 },
-        z: 2,
-      });
     });
 
     return {

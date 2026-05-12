@@ -1573,3 +1573,122 @@
 [19:26:05] ← GET /api/data/status [304] 1ms
 [19:26:06] → GET /api/data/status
 [19:26:06] ← GET /api/data/status [304] 2ms
+[19:31:18] Backend server running at http://localhost:3001
+[19:31:18] 查看日志: http://localhost:3001/api/logs
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [200] 3ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] → GET /api/data/status
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] → GET /api/data/status
+[19:31:18] → GET /api/data/status
+[19:31:18] ← GET /api/data/status [304] 1ms
+[19:31:18] ← GET /api/data/status [304] 0ms
+[19:31:19] → GET /api/data/status
+[19:31:19] ← GET /api/data/status [304] 0ms
+[19:31:20] → GET /api/data/status
+[19:31:20] ← GET /api/data/status [304] 0ms
+[19:31:21] → GET /api/data/status
+[19:31:21] ← GET /api/data/status [304] 1ms
+[19:31:26] → POST /api/upload
+[19:31:26] [upload] 收到文件: test-10k.txt
+[19:31:26] [upload] 文件大小: 399.41 KB
+[19:31:26] [upload] 文件前200字符: 2D\nrectangle,-792.0848,-793.0776,2.2499,5.0935\nrectangle,-774.9457,-791.2793,4.3909,4.7405\nrectangle,-760.4165,-790.9233,2.1803,4.7827\nball,-744.8429,-793.1602,-46.4928,4.0477\ncircle,-728.1481,-791.98
+[19:31:26] [upload] 开始解析...
+[19:31:26] [parse] 进度: 0%
+[19:31:27] [parse] 进度: 100%
+[19:31:27]   模式: 2D 多边形
+[19:31:27]   版本号: 1
+[19:31:27]   多边形数: 10000
+[19:31:27]   总顶点数: 442360
+[19:31:27]   第一个图形类型: rectangle 顶点数: 4
+[19:31:27] ← POST /api/upload [200] 54ms
+[19:31:27] [upload] 解析完成:
+[19:31:27] → GET /api/data
+[19:31:27] [data] 返回数据 version=1 大小=20164.80KB
+[19:31:27] ← GET /api/data [200] 165ms
+[19:31:28] → GET /api/data/status
+[19:31:28] ← GET /api/data/status [200] 2ms
+[19:31:29] → GET /api/data/status
+[19:31:29] ← GET /api/data/status [304] 2ms
+[19:31:30] → GET /api/data/status
+[19:31:30] ← GET /api/data/status [304] 2ms
+[19:31:31] → GET /api/data/status
+[19:31:31] ← GET /api/data/status [304] 1ms
+[19:31:32] → GET /api/data/status
+[19:31:32] ← GET /api/data/status [304] 1ms
+[19:31:33] → GET /api/data/status
+[19:31:33] ← GET /api/data/status [304] 1ms
+[19:31:34] → GET /api/data/status
+[19:31:34] ← GET /api/data/status [304] 2ms
+[19:31:35] → GET /api/data/status
+[19:31:35] ← GET /api/data/status [304] 2ms
+[19:31:36] → GET /api/data/status
+[19:31:36] ← GET /api/data/status [304] 2ms
+[19:31:37] → GET /api/data/status
+[19:31:37] ← GET /api/data/status [304] 1ms
+[19:31:38] → GET /api/data/status
+[19:31:38] ← GET /api/data/status [304] 1ms
+[19:31:39] → GET /api/data/status
+[19:31:39] ← GET /api/data/status [304] 1ms
+[19:31:40] → GET /api/data/status
+[19:31:40] ← GET /api/data/status [304] 2ms
+[19:31:41] → GET /api/data/status
+[19:31:41] ← GET /api/data/status [304] 1ms
+[19:31:42] → GET /api/data/status
+[19:31:42] ← GET /api/data/status [304] 1ms
+[19:31:43] → GET /api/data/status
+[19:31:43] ← GET /api/data/status [304] 1ms
+[19:31:44] → GET /api/data/status
+[19:31:44] ← GET /api/data/status [304] 1ms
+[19:31:45] → GET /api/data/status
+[19:31:45] ← GET /api/data/status [304] 0ms
+[19:31:46] → GET /api/data/status
+[19:31:46] ← GET /api/data/status [304] 2ms
+[19:31:47] → GET /api/data/status
+[19:31:47] ← GET /api/data/status [304] 1ms
+[19:31:48] → GET /api/data/status
+[19:31:48] ← GET /api/data/status [304] 1ms
+[19:31:49] → GET /api/data/status
+[19:31:49] ← GET /api/data/status [304] 1ms
+[19:31:50] → GET /api/data/status
+[19:31:50] ← GET /api/data/status [304] 1ms
+[19:31:51] → GET /api/data/status
+[19:31:51] ← GET /api/data/status [304] 1ms
+[19:31:52] → GET /api/data/status
+[19:31:52] ← GET /api/data/status [304] 1ms
+[19:31:53] → GET /api/data/status
+[19:31:53] ← GET /api/data/status [304] 1ms
